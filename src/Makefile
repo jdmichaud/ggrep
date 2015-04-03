@@ -13,21 +13,20 @@ RM  = rm -fr
 #
 #
 NAME = ggrep
-#SRCS = model.cc terminal_view.cc main.cc
 SRCS = $(wildcard *.cc)
-OBJS   = $(SRCS:.cs=.o)
+OBJS   = $(SRCS:.cc=.o)
 #
-CFLAGS = -Wall -Wextra -Wshadow -std=c++98
-IPATH  = -I../src -I../../mylib/src
+CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -ggdb3
+IPATH  = -I../src -I../../mylib/src -I../../loglite
 LPATH  = -L../lib
-LIB    = -lcppunit -lpthread -lefence -lstdc++ -lmylib
+LIB    = -lcppunit -lpthread -lefence -lstdc++ -lmylib -lncurses
 #
 .PHONY = all clean fclean
 #
 all: $(OBJS)
 	$(CC) $(IPATH) $(LPATH) $(CFLAGS) $(OBJS) -o $(NAME) $(LIB)
-.cc .o:
-	$(CC) $(IPATH) $(CFLAGS) -c $<
+%.o : %.cc
+	$(CC) -c $(IPATH) $(CFLAGS) $< -o $@
 #
 clean: fclean
 	$(RM) *o *c~ *cc~ *hpp~ *~ Makefile~ \#* .depend
