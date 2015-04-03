@@ -22,6 +22,7 @@ class FBarModel : public Observable
 {
 public:
   FBarModel();
+  void add_function(function_t function);
 
   std::vector<function_t> _functions;
 };

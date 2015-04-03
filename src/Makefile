@@ -19,7 +19,7 @@ OBJS   = $(SRCS:.cc=.o)
 CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -ggdb3
 IPATH  = -I../src -I../../mylib/src -I../../loglite
 LPATH  = -L../lib
-LIB    = -lcppunit -lpthread -lefence -lstdc++ -lmylib -lncurses
+LIB    = -lcppunit -lpthread -lefence -lstdc++ -lmylib -lncurses -pthread
 #
 .PHONY = all clean fclean
 #

@@ -8,27 +8,31 @@
  *  Terminal view is using ncurses to manipulate text over a text terminal.
  */
 
-#ifndef __VIEW_H__
-#define __VIEW_H__
+#ifndef __TERMINAL_VIEW_H__
+#define __TERMINAL_VIEW_H__
 
+#include <assert.h>
 #include <vector>
-#include "observer.hpp"
+#include "view.h"
 #include "content_model.h"
 #include "fbar_model.h"
 #include "prompt_model.h"
+#include "controller.h"
 
-class TerminalView : public Observer
+class TerminalView : public IView
 {
 public:
-  TerminalView(ContentModel &content_model,
-               FBarModel &fbar_model, PromptModel &prompt_model);
+  TerminalView(ContentModel &content_model, FBarModel &fbar_model, 
+               PromptModel &prompt_model);
   ~TerminalView();
 
   uint init();
+  void notify(IObservable &observable) { assert(false); }
   void notify(ContentModel &content_model);
   void notify(FBarModel &fbar_model);
   void notify(PromptModel &prompt_model);
-  void run();
+
+  void prompt(Controller &);
 
 private:
   void redraw_content(ContentModel &);
@@ -36,19 +40,16 @@ private:
   void redraw_prompt(PromptModel &);
 
 private:
-  /**
-   * Terminal related information
+  /** Terminal related information
    */
   uint _nlines;
   uint _ncols;
 
-  /**
-   * Models
+  /** Models
    */
   ContentModel  *_content_model;
   FBarModel     *_fbar_model;
   PromptModel   *_prompt_model;
-
 };
 
-#endif //__VIEW_H__
+#endif //__TERMINAL_VIEW_H__
