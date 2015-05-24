@@ -10,14 +10,18 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "XXX_tests.hpp"
+#include "tests_model.hpp"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( XXXTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( ModelTest );
 
 int main(int argc, char **argv)
 {
+  // Init CppUnit
   CppUnit::TextUi::TestRunner runner;
-  runner.addTest( XXXTest::suite()            );
+  // Init Google Mock
+  ::testing::GTEST_FLAG(throw_on_failure) = true;
+  ::testing::InitGoogleMock(&argc, argv);
+  runner.addTest( ModelTest::suite()            );
   runner.run();
   return 0;
 }

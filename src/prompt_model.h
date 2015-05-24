@@ -8,14 +8,14 @@
 
 #include <string>
 #include "types.h"
-#include "observable.hpp"
+#include "model.hpp"
 
 #define DEFAULT_PROMPT ":"
 
-class PromptModel : public Observable
+class PromptModel : public Model
 {
 public:
-    PromptModel();
+  PromptModel();
 
 private:
     std::string _prompt;

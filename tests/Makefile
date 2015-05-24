@@ -15,10 +15,10 @@ SRC  = main.cpp
 #
 OBJS = $(SRC:.cpp=.o)
 #
-CFLAGS = -Wall -Wextra -Wshadow -std=c++98
-IPATH  = -I../../src/base -I../../src/plugin
-#LPATH  = -L. -L../src
-LIB    = -lcppunit -lpthread -lefence
+CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -ggdb3
+IPATH  = -I.. -I../src -I../../mylib/src -I../../ -I/usr/src/gmock/gtest/include
+LPATH  = -L../src -L../lib -L/usr/src/gmock
+LIB    = -lcppunit -lpthread -lgmock -lefence -lstdc++ -lmylib
 #
 all: $(OBJS)
 	$(CC) $(IPATH) $(LPATH) $(CFLAGS) $(OBJS) -o $(NAME) $(LIB)

@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include "types.h"
-#include "observable.hpp"
+#include "model.hpp"
 
 typedef struct {
   std::string key;
@@ -18,13 +18,13 @@ typedef struct {
   bool disabled;
 } function_t;
 
-class FBarModel : public Observable
+class FBarModel : public Model
 {
 public:
   FBarModel();
   void add_function(function_t function);
 
-  std::vector<function_t> _functions;
+  DECLARE_ENTRY( FBarModel, functions, std::vector<function_t> )
 };
 
 #endif //__FBAR_MODEL_H__

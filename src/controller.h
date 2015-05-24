@@ -9,15 +9,15 @@
 
 #include <list>
 #include "view.h"
-#include "observer.hpp"
-#include "content_model.h"
+#include "buffer_model.h"
 #include "fbar_model.h"
 #include "prompt_model.h"
 
 class Controller
 {
 public:
-  Controller(ContentModel &content_model, FBarModel &fbar_model, 
+  Controller(BufferModel &buffer_model, 
+             FBarModel &fbar_model, 
              PromptModel &prompt_model);
 
   /**
@@ -41,9 +41,9 @@ private:
   bool  _interrupted;
 
   // For now let's assume only one set of model
-  ContentModel  *_content_model;
-  FBarModel     *_fbar_model;
-  PromptModel   *_prompt_model;
+  BufferModel   &_buffer_model;
+  FBarModel     &_fbar_model;
+  PromptModel   &_prompt_model;
 
 };
 

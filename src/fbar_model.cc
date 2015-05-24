@@ -2,7 +2,7 @@
 #include "fbar_model.h"
 
 FBarModel::FBarModel() :
-  _functions({
+  m_functions({
       { "F1", "Help", false, false },
       { "F2", "Mark", false, false },
       { "F3", "Search", false, false }
@@ -10,7 +10,7 @@ FBarModel::FBarModel() :
 }
 
 void FBarModel::add_function(function_t function) {
-  this->_functions.push_back(function);
-  LOGDBG("notify observers") 
-  this->notify_observers();
+  auto u = this->set_functions();
+  u.update().push_back(function);
+  LOGDBG("TEST");
 }

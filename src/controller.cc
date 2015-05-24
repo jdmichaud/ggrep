@@ -1,12 +1,13 @@
 #include "logmacros.h"
 #include "controller.h"
 
-Controller::Controller(ContentModel &content_model, FBarModel &fbar_model, 
+Controller::Controller(BufferModel &buffer_model, 
+                       FBarModel &fbar_model,
                        PromptModel &prompt_model) :
-  _content_model(&content_model),
-  _fbar_model(&fbar_model),
-  _prompt_model(&prompt_model),
-  _interrupted(false) {
+  _interrupted(false),
+  _buffer_model(buffer_model),
+  _fbar_model(fbar_model),
+  _prompt_model(prompt_model) {
 }
 
 void Controller::bind_view(IView &view) {
@@ -17,8 +18,6 @@ void Controller::inject(int key) {
   LOGDBG("Controller::inject called with key: " << key);
   if (key == 27) {
     _interrupted = true;
-  } else {
-    _fbar_model->add_function({ "A", "TOTO", false, false });
   }
 }
 

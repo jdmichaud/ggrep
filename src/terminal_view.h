@@ -1,6 +1,6 @@
 /*! \brief A view to display the filtered text on a text based terminal
  *
- *  The terminal view is observing the model and updates the content of the
+ *  The terminal view is observing the model and updates the buffer of the
  *  screen. Additionally to the filtered text, the text terminal displays a
  *  function bar mapping the function keys (Fx) with commands and a prompt line
  *  where filtered text or command shall be entered.
@@ -14,7 +14,7 @@
 #include <assert.h>
 #include <vector>
 #include "view.h"
-#include "content_model.h"
+#include "buffer_model.h"
 #include "fbar_model.h"
 #include "prompt_model.h"
 #include "controller.h"
@@ -22,23 +22,23 @@
 class TerminalView : public IView
 {
 public:
-  TerminalView(ContentModel &content_model, FBarModel &fbar_model, 
+  TerminalView(BufferModel &buffer_model, FBarModel &fbar_model,
                PromptModel &prompt_model);
   ~TerminalView();
 
   uint init();
-  void notify(IObservable &observable) { assert(false); }
-  void notify(ContentModel &content_model);
-  void notify(FBarModel &fbar_model);
-  void notify(PromptModel &prompt_model);
+  void notify_buffer_changed(IObservable &observable);
+  void notify_prompt_changed(IObservable &observable);
+  void notify_fbar_changed(IObservable &observable);
 
   void prompt(Controller &);
 
 private:
-  void redraw_content(ContentModel &);
+  void redraw_buffer(BufferModel &);
   void redraw_fbar(FBarModel &);
   void redraw_prompt(PromptModel &);
-
+  void redraw_all();
+  
 private:
   /** Terminal related information
    */
@@ -47,7 +47,7 @@ private:
 
   /** Models
    */
-  ContentModel  *_content_model;
+  BufferModel   *_buffer_model;
   FBarModel     *_fbar_model;
   PromptModel   *_prompt_model;
 };

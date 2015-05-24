@@ -17,7 +17,7 @@ SRCS = $(wildcard *.cc)
 OBJS   = $(SRCS:.cc=.o)
 #
 CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -ggdb3
-IPATH  = -I../src -I../../mylib/src -I../../loglite
+IPATH  = -I../ -I../src -I../../mylib/src -I../../loglite
 LPATH  = -L../lib
 LIB    = -lcppunit -lpthread -lefence -lstdc++ -lmylib -lncurses -pthread
 #
