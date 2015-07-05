@@ -16,7 +16,7 @@ NAME = ggrep
 SRCS = $(wildcard *.cc)
 OBJS   = $(SRCS:.cc=.o)
 #
-CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -ggdb3
+CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -ggdb3 -Wfatal-errors
 IPATH  = -I../ -I../src -I../../mylib/src -I../../loglite
 LPATH  = -L../lib
 LIB    = -lcppunit -lpthread -lefence -lstdc++ -lmylib -lncurses -pthread

@@ -14,7 +14,7 @@ all		: $(NAME) $(TEST)
 #
 $(NAME)	:
 		cd $(SRCDIR) && make && cd ..
-		cp $(SRCDIR)/$(NAME)
+		cp $(SRCDIR)$(NAME) $(NAME)
 #
 $(TEST) :
 		cd $(TESTDIR) && make && cd ..

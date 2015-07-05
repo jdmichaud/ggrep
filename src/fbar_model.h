@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include "types.h"
-#include "model.hpp"
+#include "model.h"
 
 typedef struct {
   std::string key;

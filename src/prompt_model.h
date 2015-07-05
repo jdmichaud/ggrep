@@ -8,7 +8,7 @@
 
 #include <string>
 #include "types.h"
-#include "model.hpp"
+#include "model.h"
 
 #define DEFAULT_PROMPT ":"
 

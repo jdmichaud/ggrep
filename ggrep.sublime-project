@@ -1,0 +1,25 @@
+{
+	"build_systems":
+	[
+		{
+			"name": "Make",
+			"shell_cmd": "make"
+		}
+	],
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "/home/jedi/Dropbox/projects/c++/mylib"
+		},
+		{
+			"follow_symlinks": true,
+			"path": "."
+		}
+	],
+	"settings":
+	{
+		"sublimegdb_commandline": "gdb -nx -readnow -fullname --interpreter=mi -args ggrep",
+		"sublimegdb_workingdir": "./src"
+	}
+}
