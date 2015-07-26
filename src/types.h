@@ -3,4 +3,9 @@
 
 typedef unsigned int uint;
 
+typedef struct {
+  uint x;
+  uint y;
+} pos;
+
 #endif //__TYPES_H__

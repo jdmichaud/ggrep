@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "context.h"
 #include "event.h"
 #include "state.h"
@@ -5,25 +6,46 @@
 
 #include "logmacros.h"
 
-Context::Context(IInvoker &invoker) : m_invoker(invoker) {
-  m_states[CLOSE_STATE] = CloseState(*this, m_invoker, nullptr);
-  m_states[OPEN_STATE] = OpenState(*this, m_invoker, nullptr);
-  m_states[BROWSE_STATE] = BrowseState(*this, m_invoker, m_states[OPEN_STATE]);
+Context::Context(Controller &controller) {
+  m_states.emplace(state_e::CLOSE_STATE,
+                   new CloseState(*this, controller, nullptr));
+  m_states.emplace(state_e::OPEN_STATE,
+                   new OpenState(*this, controller, nullptr));
+  m_states.emplace(state_e::ERROR_STATE,
+                   new ErrorState(*this, controller, nullptr));
+  m_states.emplace(state_e::BROWSE_STATE,
+                   new BrowseState(*this, controller,
+                                   m_states[state_e::OPEN_STATE]));
   // Starting point of the state machine
-  m_state = m_states[CLOSE_STATE];
+  m_state = m_states[state_e::CLOSE_STATE];
+  m_state->enter(Event(APP_STARTED));
 }
 
 void Context::inject(const IEvent &event) {
-  if (!m_state.handle(event))
-    throw UnhandledEvent(m_state, event);
+  if (!m_state->handle(event))
+    throw UnhandledEvent(*m_state, event);
 }
 
 void Context::change_state(IState &new_state, const IEvent &input) {
-  m_state.exit(input);
-  m_state = new_state;
-  m_state.enter(intput)
+  m_state->exit(input);
+  new_state.set_previous_state(m_state);
+  m_state = &new_state;
+  m_state->enter(input);
+}
+
+void Context::backtrack(const IEvent &e) {
+  IState *previous_state;
+  if ((previous_state = m_state->get_previous_state())) {
+    m_state->exit(e);
+    m_state = previous_state;
+    m_state->enter(e);
+  }
+  else {
+    throw std::runtime_error(std::string("Can't backtrack from state ") + 
+                             m_state->get_type().name());
+  }
 }
 
 IState &Context::get_state(state_e state) {
-  return m_states[state];
+  return *m_states[state];
 }

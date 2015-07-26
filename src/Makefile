@@ -6,7 +6,9 @@
 ##
 ##
 
-CC  = colorgcc -ggdb3
+#CC  = colorgcc -rdynamic
+CC  = clang++
+#-Wl,--export-dynamic
 AR  = ar
 #CC  = clang++ -g
 RM  = rm -fr
@@ -15,11 +17,13 @@ RM  = rm -fr
 NAME = ggrep
 SRCS = $(wildcard *.cc)
 OBJS   = $(SRCS:.cc=.o)
+DPDS = $(SRCS:.cc=.d)
 #
-CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -ggdb3 -Wfatal-errors
+CFLAGS = -ggdb3 -Wall -Wextra -Wshadow -std=c++11 -ggdb3 -Wfatal-errors -Wno-unused-parameter -DS_LOGERR -DS_LOGINF -DS_LOGDBG
 IPATH  = -I../ -I../src -I../../mylib/src -I../../loglite
 LPATH  = -L../lib
-LIB    = -lcppunit -lpthread -lefence -lstdc++ -lmylib -lncurses -pthread
+LIB    = -lcppunit -lpthread -lstdc++ -lmylib -lncursesw
+DEBUGLIB = -lefence -lSegFault
 #
 .PHONY = all clean fclean
 #
@@ -29,15 +33,15 @@ all: $(OBJS)
 	$(CC) -c $(IPATH) $(CFLAGS) $< -o $@
 #
 clean: fclean
-	$(RM) *o *c~ *cc~ *hpp~ *~ Makefile~ \#* .depend
+	$(RM) *o *c~ *cc~ *hpp~ *~ Makefile~ \#* *.d
 #
 fclean:
 	$(RM) $(NAME)
 #
 re  : clean all
 #
-depend: .depend
-.depend: $(SRCS)
-	rm -f ./.depend
-	$(CC) $(CFLAGS) $(IPATH) -MM $(SRCS) -MF  ./.depend;
-include .depend
+depend: $(DPDS)
+%.d : %.cc
+	rm -fr $@
+	$(CC) $(CFLAGS) $(IPATH) -MM $< -MF $@
+include $(DPDS)

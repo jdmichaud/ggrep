@@ -1,0 +1,4 @@
+main.o: main.cc logmacros.h terminal_view.h view.h browser_model.h \
+ types.h model.h ../../mylib/src/observable.hpp buffer_model.h buffer.h \
+ fbar_model.h prompt_model.h controller.h state.h event.h command.h \
+ ../../mylib/src/synch.h buffer_factory.h context.h input.h

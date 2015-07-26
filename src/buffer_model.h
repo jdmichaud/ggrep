@@ -23,26 +23,32 @@ typedef struct {
   uint end_pos;
 } tattr_t;
 
-typedef std::list<tattr_t> attr_list;
+typedef std::list<std::list<tattr_t>> attr_list;
 
 /*
  * Points to text hold by a Buffer and gives information as to where the model
  * is pointing to and what attributes applies to the text.
  */
-template <typename StreamType = std::ifstream>
 class BufferModel : public Model
 {
 public:
-  BufferModel(std::unique_ptr<Buffer<StreamType> > &buffer);
+  BufferModel(std::unique_ptr<IBuffer> &&buffer);
 
-  DECLARE_ENTRY( BufferModel, line_number, uint )
-  DECLARE_ENTRY( BufferModel, text, char ** )
-  DECLARE_ENTRY( BufferModel, attrs, attr_list ** );
-
+  DECLARE_ENTRY( BufferModel, line_number, uint );
+  DECLARE_ENTRY( BufferModel, attrs, attr_list );
+  /*!
+   * DECLARE_ENTRY macro do not work well on pointers to pointers...
+   */
+  const char * const * get_text() const { return m_text; }
+  Update<char **> set_text() {
+    notify_callback_t f = std::bind(&BufferModel::notify_observers, this);
+    return Update<char **>(m_text, f);
+  }
 private:
-  std::unique_ptr<Buffer<StreamType> > m_buffer;
+  std::unique_ptr<IBuffer> m_buffer;
+  char **m_text;
 };
 
-typedef std::list<std::unique_ptr<BufferModel<> > > buffer_list;
+typedef std::list<std::unique_ptr<BufferModel> > buffer_list;
 
 #endif //__BUFFER_MODEL_H__

@@ -16,9 +16,8 @@ class PromptModel : public Model
 {
 public:
   PromptModel();
-
-private:
-    std::string _prompt;
+  DECLARE_ENTRY( PromptModel, prompt, std::string);
+  DECLARE_ENTRY( PromptModel, cursor_position, pos);
 };
 
 #endif //__PROMPT_MODEL_H__
