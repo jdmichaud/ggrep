@@ -21,6 +21,7 @@ public:
 
   DECLARE_ENTRY( BrowserModel, buffers, buffer_list);
   DECLARE_ENTRY( BrowserModel, current_buffer, buffer_list::iterator );
+  DECLARE_ENTRY( BrowserModel, view_line_number, uint );
 
 public:
   /*
@@ -36,6 +37,13 @@ public:
    * Set the current buffer to the pointer buffer by the _const_ iterator
    */
   void set_current_buffer(buffer_list::const_iterator);
+  /*
+   * Add a new buffer
+   */
+  void emplace_buffer(std::unique_ptr<BufferModel> &&buffer_model);
+
+private:
+  BrowserModel(const BrowserModel &) = delete;
 };
 
 #endif //__BROWSER_MODEL_H__

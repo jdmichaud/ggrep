@@ -33,9 +33,12 @@ class BufferModel : public Model
 {
 public:
   BufferModel(std::unique_ptr<IBuffer> &&buffer);
+  ~BufferModel();
 
   DECLARE_ENTRY( BufferModel, line_number, uint );
+  DECLARE_ENTRY( BufferModel, first_line_displayed, uint );
   DECLARE_ENTRY( BufferModel, attrs, attr_list );
+public:
   /*!
    * DECLARE_ENTRY macro do not work well on pointers to pointers...
    */

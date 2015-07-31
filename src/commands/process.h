@@ -15,7 +15,7 @@ public:
     Command(controller, invoker, state), m_exitcode(exitcode) {}
 
   virtual void execute() {
-    LOGDBG("interrupting the controller");
+    LOGDBG("interrupting the controller with exit code " << m_exitcode);
     m_controller.interrupt();
   }
   virtual void unexecute() {

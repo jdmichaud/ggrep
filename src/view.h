@@ -6,6 +6,7 @@
 #define __VIEW_H__
 
 #include <vector>
+#include "model.h"
 
 class Controller;
 
@@ -15,6 +16,12 @@ public:
   /** Wait for a user interaction.
    */
   virtual void prompt(Controller &) = 0;
+  /** Signal the creation of a new buffer
+   */
+  virtual void new_buffer(Model &) = 0;
+  /** Provide the view size for text browsing commands
+  */
+  virtual void get_view_size(uint &nlines, uint ncols) = 0;
 };
 
 #endif // __VIEW_H__

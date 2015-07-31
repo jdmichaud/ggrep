@@ -1,7 +1,9 @@
+#include <memory>
+#include "model.h"
 #include "browser_model.h"
 
 BrowserModel::BrowserModel() :
-  m_current_buffer(m_buffers.end())
+  m_current_buffer(m_buffers.end()), m_view_line_number(0)
 {
 }
 
@@ -19,6 +21,19 @@ Update<buffer_list::iterator> BrowserModel::set_nth_buffer(uint idx)
 
 void BrowserModel::set_current_buffer(buffer_list::const_iterator it)
 {
-  set_current_buffer().update() = std::find(m_buffers.begin(), 
-                                            m_buffers.end(), *it);
+  (*this).set_current_buffer().update() = std::find(m_buffers.begin(),
+                                                    m_buffers.end(), *it);
+}
+
+void BrowserModel::emplace_buffer(std::unique_ptr<BufferModel> &&buffer_model) {
+  LOGDBG("&buffer_model: " << &(*buffer_model));
+  // Kepp the update alive so the current buffer as time to be set
+  Update<buffer_list> u = (*this).set_buffers();
+  // push back the new buffer
+  u.update().emplace_back(std::move(buffer_model));
+  // if no buffer was set before, then set the current buffer to the newly
+  // created one
+  if (m_buffers.size() == 1) {
+    (*this).set_current_buffer().update() = m_buffers.begin();
+  }
 }
