@@ -1,4 +1,3 @@
-syntax: glob
 *.orig
 *.rej
 *~
@@ -6,8 +5,8 @@ syntax: glob
 *.a
 *.d
 .depend
-
+ggrep
 src/ggrep
-syntax: regexp
-.*\#.*\#$
+ggrep.sublime-project
+ggrep.sublime-workspace
 
