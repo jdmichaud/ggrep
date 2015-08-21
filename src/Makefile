@@ -20,7 +20,13 @@ SRCS = $(wildcard *.cc) $(wildcard curses/*.cc)
 OBJS = $(SRCS:.cc=.o)
 DPDS = $(SRCS:.cc=.d)
 #
-CFLAGS = -ggdb3 -Wall -Wextra -Wshadow -std=c++11 -ggdb3 -Wfatal-errors -Wno-unused-parameter -DS_LOGERR -DS_LOGINF -DS_LOGDBG
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CFLAGS = -ggdb3 -Wall -Wextra -Wshadow -std=c++11 -Wfatal-errors -Wno-unused-parameter -DS_LOGERR -DS_LOGINF -DS_LOGDBG
+endif
+ifeq ($(UNAME_S),Darwin)
+	CFLAGS = -ggdb3 -Wall -Wextra -Wshadow -std=c++11 -stdlib=libc++ -Wfatal-errors -Wno-unused-parameter -DS_LOGERR -DS_LOGINF -DS_LOGDBG
+endif
 IPATH  = -I../ -I../src -I../../mylib/src -I../../loglite
 LPATH  = -L../lib
 LIB    = -lcppunit -lpthread -lstdc++ -lmylib_$(HOST) -lncursesw

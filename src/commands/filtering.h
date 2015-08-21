@@ -12,16 +12,14 @@
 class AddFilterCommand : public Command {
 public:
   AddFilterCommand(Controller &controller, Invoker &invoker, IState *state,
-                   std::string filter) :
+                   const std::string &filter) :
     Command(controller, invoker, state), m_filter(filter) {}
 
   virtual void execute() {
-    // TODO
+    m_controller.add_filter(m_filter);
   }
-  virtual void unexecute() {
-    // TODO
-  }
-  virtual bool unexecutable() { return true; };
+  virtual void unexecute() { /* non undoable */ }
+  virtual bool unexecutable() { return false; };
 private:
   std::string m_filter;
 };
