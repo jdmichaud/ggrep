@@ -90,7 +90,8 @@ void TerminalView::redraw_all() {
 void TerminalView::redraw_buffer(BufferModel &buffer_model) {
   LOGDBG("TerminalView::redraw_buffer called");
   if (_state_model.get_state() == state_e::OPEN_STATE
-      || _state_model.get_state() == state_e::BROWSE_STATE)
+      || _state_model.get_state() == state_e::BROWSE_STATE
+      || _state_model.get_state() == state_e::FILTER_STATE)
   {
     print_buffer(stdscr, buffer_model, buffer_model.get_first_line_displayed(),
                  0, this->_nlines, this->_ncols, 0, false);
@@ -136,7 +137,8 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
     // Print the prompt
     wprintw(stdscr, "%s",
             &prompt_model.get_prompt().c_str()[_prompt_string_index]);
-  } else if (_state_model.get_state() == state_e::BROWSE_STATE) {
+  } else if (_state_model.get_state() == state_e::BROWSE_STATE ||
+             _state_model.get_state() == state_e::FILTER_STATE) {
     // display the number of lines and the current top line (25 because 2^32 is
     // the maximum number of lines we can load do we can at most display
     // 4294967296/4294967296)
@@ -181,6 +183,9 @@ void TerminalView::redraw_cursor(StateModel &state_model) {
     curs_set(0);
   }
   else if (state_model.get_state() == state_e::BROWSE_STATE) {
+    curs_set(0);
+  }
+  else if (state_model.get_state() == state_e::FILTER_STATE) {
     curs_set(0);
   }
 }
