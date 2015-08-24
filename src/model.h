@@ -12,7 +12,7 @@
 #include <functional>
 
 #include "logmacros.h"
-#include "observable.hpp"
+#include "observable.h"
 
 typedef std::function<void()> notify_callback_t;
 

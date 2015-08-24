@@ -8,7 +8,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <gmock/gmock.h>
 
-#include "observable.hpp"
+#include "observable.h"
 #include "model.h"
 
 using ::testing::_;

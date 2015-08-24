@@ -27,9 +27,9 @@ endif
 ifeq ($(UNAME_S),Darwin)
 	CFLAGS = -ggdb3 -Wall -Wextra -Wshadow -std=c++11 -stdlib=libc++ -Wfatal-errors -Wno-unused-parameter -DS_LOGERR -DS_LOGINF -DS_LOGDBG
 endif
-IPATH  = -I../ -I../src -I../../mylib/src -I../../loglite
-LPATH  = -L../../mylib/
-LIB    = -lcppunit -lpthread -lstdc++ -lmylib_$(HOST) -lncursesw
+IPATH  = -I../ -I../src -I../../loglite
+LPATH  =
+LIB    = -lcppunit -lpthread -lstdc++ -lncursesw
 DEBUGLIB = -lefence -lSegFault
 #
 .PHONY = all clean fclean

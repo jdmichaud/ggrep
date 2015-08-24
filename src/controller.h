@@ -14,9 +14,9 @@
 #include <fstream>
 #include <thread>
 
-#include "work_queue.hpp"
-#include "producer.hpp"
-#include "consumer.hpp"
+#include "work_queue.h"
+#include "producer.h"
+#include "consumer.h"
 
 #include "view.h"
 #include "browser_model.h"
