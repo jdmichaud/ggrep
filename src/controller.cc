@@ -72,7 +72,7 @@ void Controller::inject(int key) {
   LOGDBG("Controller::inject called with key: " << key <<
          " (" << std::oct << key << std::dec << ")");
   try {
-    const Event &e = _input_factory.build_input(key);
+    const Event e = _input_factory.build_input(key);
     LOGDBG("e.get_eventid(): " << e.get_eventid());
 #ifdef MULTI_THREADED_USER_INPUT
     _user_event_producer.produce(std::move(e));
