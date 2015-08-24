@@ -15,3 +15,8 @@ std::ostream& operator<<(std::ostream& os, const state_e& state)
   }
   return os;
 }
+
+std::ostream& operator<<(std::ostream& os, const IState& s) {
+  os << s.get_id();
+  return os;
+};

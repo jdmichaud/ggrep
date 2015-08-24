@@ -32,11 +32,14 @@ CloseState::CloseState(Context &context, Controller &controller,
 
 void CloseState::enter(const IEvent &e) {
   LOGDBG("entering CloseState");
-  // If we enter the state we want to initialize out text unless we are
-  // backtraking
-  if (e != BACKTRACK) {
-    (*this).clear();
-  }
+  // initialize the text string
+  (*this).clear();
+  // Update the model
+  update();
+}
+
+void CloseState::resume(const IEvent &e) {
+  LOGDBG("resume CloseState");
   // Update the model
   update();
 }
@@ -127,11 +130,14 @@ AddFilterState::AddFilterState(Context &context, Controller &controller,
 
 void AddFilterState::enter(const IEvent &e) {
   LOGDBG("entering AddFilterState");
-  // If we enter the state we want to initialize out text unless we are
-  // backtraking
-  if (e != BACKTRACK) {
-    (*this).clear();
-  }
+  // initialize the text string
+  (*this).clear();
+  // Update the model
+  update();
+}
+
+void AddFilterState::resume(const IEvent &e) {
+  LOGDBG("resume AddFilterState");
   // Update the model
   update();
 }

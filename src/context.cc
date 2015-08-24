@@ -33,6 +33,7 @@ void Context::inject(const IEvent &event) {
 }
 
 void Context::change_state(IState &new_state, const IEvent &input) {
+  LOGDBG(" " << m_state << " -> " << new_state);
   m_state->exit(input);
   new_state.set_previous_state(NULL);
   m_state = &new_state;
@@ -40,6 +41,7 @@ void Context::change_state(IState &new_state, const IEvent &input) {
 }
 
 void Context::enter_state(IState &new_state, const IEvent &input) {
+  LOGDBG(" -> " << m_state);
   m_state->suspend(input);
   m_state_stack.push(m_state);
   new_state.set_previous_state(m_state);
@@ -48,6 +50,7 @@ void Context::enter_state(IState &new_state, const IEvent &input) {
 }
 
 void Context::exit_state(const IEvent &input) {
+  LOGDBG(" <- " << m_state);
   m_state->exit(input);
   m_state = m_state_stack.top();
   m_state_stack.pop();
@@ -57,9 +60,9 @@ void Context::exit_state(const IEvent &input) {
 void Context::backtrack(const IEvent &e) {
   IState *previous_state;
   if ((previous_state = m_state->get_previous_state())) {
+    LOGDBG(" Backtrack " << previous_state << " <- ")
     m_state->exit(e);
     m_state = previous_state;
-    m_state->enter(e);
   }
   else {
     throw std::runtime_error(std::string("Can't backtrack from state ") +

@@ -68,7 +68,7 @@ public:
   /*!
    * Return the ID of ths state
    */
-  virtual state_e get_id() = 0;
+  virtual state_e get_id() const = 0;
   /*!
    * Set the state which we was active before entering this state
    */
@@ -78,6 +78,11 @@ public:
    */
   virtual IState *get_previous_state() const = 0;
 };
+
+/*
+ * Streaming operator for IState to string operation
+ */
+std::ostream& operator<<(std::ostream& os, const IState& s);
 
 /*
  * The mapping between input and actions is a combination of searching through
@@ -134,7 +139,7 @@ public:
     }
     return false;
   }
-  inline state_e get_id() { return m_id; };
+  inline state_e get_id() const { return m_id; };
   void set_previous_state(IState *state) { m_previous_state = state; }
   IState *get_previous_state() const { return m_previous_state;  }
 protected:

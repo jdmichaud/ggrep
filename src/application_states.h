@@ -25,9 +25,7 @@ public:
   void suspend(const IEvent &) {
     LOGDBG("suspend CloseState");
   }
-  void resume(const IEvent &) {
-    LOGDBG("resume CloseState");
-  }
+  void resume(const IEvent &);
   virtual void update();
 };
 
@@ -96,9 +94,7 @@ public:
   void suspend(const IEvent &) {
     LOGDBG("suspend FilterState");
   }
-  void resume(const IEvent &) {
-    LOGDBG("resume FilterState");
-  }
+  void resume(const IEvent &);
   virtual void update();
 };
 
