@@ -146,6 +146,7 @@ void AddFilterState::exit(const IEvent &) {
 }
 
 void AddFilterState::update() {
+  LOGDBG("AddFilterState::update begin");
   m_controller.set_prompt(ADD_FILTER_STATE_PROMPT + m_text);
   pos curpos = m_cur_pos;
   curpos.x += strlen(ADD_FILTER_STATE_PROMPT);

@@ -120,8 +120,11 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
   wmove(stdscr, this->_nlines - 1, 0);
   // Clear the line
   wclrtoeol(stdscr);
+  /*
+   * Print a state prompt
+   */
   if (_state_model.get_state() == state_e::CLOSE_STATE
-      || _state_model.get_state() == state_e::FILTER_STATE
+      || _state_model.get_state() == state_e::ADD_FILTER_STATE
       || _state_model.get_state() == state_e::ERROR_STATE) {
     // compute where to start the prompt string
     _prompt_string_index =
@@ -159,9 +162,11 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
 
 void TerminalView::redraw_cursor(StateModel &state_model) {
   LOGDBG("application state: " << state_model.get_state());
-  // In CLOSE_STATE, the prompt is focused
+  /*
+   * Display the curso when a state prompt is expecting an input
+   */
   if (state_model.get_state() == state_e::CLOSE_STATE
-      || state_model.get_state() == state_e::FILTER_STATE) {
+      || state_model.get_state() == state_e::ADD_FILTER_STATE) {
     curs_set(1);
     wmove(stdscr, this->_nlines - 1,
           _prompt_model.get_cursor_position().x - _prompt_string_index);
