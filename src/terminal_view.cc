@@ -110,6 +110,8 @@ void TerminalView::redraw_fbar(FBarModel &fbar_model) {
   }
   // For debugging purposes, display the current state
   wmove(stdscr, 0, this->_ncols - 20);
+  // Clear the line
+  wclrtoeol(stdscr);
   std::stringstream statestream;
   statestream << _state_model.get_state();
   wprintw(stdscr, "%s", statestream.str().c_str());
