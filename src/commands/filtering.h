@@ -17,6 +17,7 @@ public:
 
   virtual void execute() {
     m_controller.add_filter(m_filter);
+    m_invoker.create_and_execute<BacktrackCommand>();
   }
   virtual void unexecute() { /* non undoable */ }
   virtual bool unexecutable() { return false; };
