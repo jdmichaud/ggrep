@@ -57,19 +57,6 @@ void Context::exit_state(const IEvent &input) {
   m_state->resume(input);
 }
 
-void Context::backtrack(const IEvent &e) {
-  IState *previous_state;
-  if ((previous_state = m_state->get_previous_state())) {
-    LOGDBG(" Backtrack " << previous_state << " <- ")
-    m_state->exit(e);
-    m_state = previous_state;
-  }
-  else {
-    throw std::runtime_error(std::string("Can't backtrack from state ") +
-                             m_state->get_type().name());
-  }
-}
-
 IState &Context::get_state(state_e state) {
   return *m_states[state];
 }

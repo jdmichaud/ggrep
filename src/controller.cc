@@ -109,7 +109,7 @@ void Controller::exit_state(const IEvent &event) {
 }
 
 void Controller::backtrack(const IEvent &e) {
-  _context.backtrack(e);
+  _context.exit_state(e);
   _state_model.set_state().update() = _context.get_current().get_id();
 }
 
