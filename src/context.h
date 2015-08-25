@@ -24,7 +24,7 @@ public:
   const char *what() const noexcept
   {
     static char msg[255];
-    snprintf(msg, 255, 
+    snprintf(msg, 255,
             "Unhandled event (%i) injected into state machine from state (%s)",
             m_event.get_eventid(), m_state.get_type().name());
     return msg;
@@ -47,7 +47,7 @@ public:
    */
   void change_state(IState &new_state, const IEvent &input);
   /*!
-   * Enter state while suspending the current state. The current is suspended 
+   * Enter state while suspending the current state. The current is suspended
    * and put on the stack. It can be resumed on exit_state
    */
   void enter_state(IState &new_state, const IEvent &input);
@@ -57,23 +57,17 @@ public:
    */
   void exit_state(const IEvent &input);
   /*!
-   * Backtracak to the previous state. Can be used to go back to a previous 
-   * state when the ESC key is used.
-   * If the state has not previous state, raise std::runtime_exception
-   */
-  void backtrack(const IEvent &);
-  /*!
    * Get the current state.
    */
   IState &get_current() { return *m_state; }
   /*!
-   * Provides an accessor to the state of the states machine from the emum 
+   * Provides an accessor to the state of the states machine from the emum
    * state_e
    */
   IState &get_state(state_e state);
 private:
   /*
-   * Current state. It's infortunate we have to use a pointer here and we will 
+   * Current state. It's infortunate we have to use a pointer here and we will
    * not be testing for NULL all the time. TODO: find a better way.
    */
   IState *m_state;
