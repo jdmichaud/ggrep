@@ -10,9 +10,7 @@
 CC  = clang++
 #-Wl,--export-dynamic
 AR  = ar
-#CC  = clang++ -g
 RM  = rm -fr
-#
 #
 HOST = $(shell hostname)
 NAME = ggrep
@@ -22,22 +20,30 @@ DPDS = $(SRCS:.cc=.d)
 #
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-	CFLAGS = -ggdb3 -Wall -Wextra -Wshadow -std=c++11 -Wfatal-errors -Wno-unused-parameter -DS_LOGERR -DS_LOGINF -DS_LOGDBG
+	CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -Wfatal-errors -Wno-unused-parameter -DS_LOGERR
 endif
 ifeq ($(UNAME_S),Darwin)
-	CFLAGS = -ggdb3 -Wall -Wextra -Wshadow -std=c++11 -stdlib=libc++ -Wfatal-errors -Wno-unused-parameter -DS_LOGERR -DS_LOGINF -DS_LOGDBG
+	CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -stdlib=libc++ -Wfatal-errors -Wno-unused-parameter -DS_LOGERR
 endif
+OPTFLGS= -O3 -Os
 IPATH  = -I../ -I../src -I../../loglite
 LPATH  =
-LIB    = -lcppunit -lpthread -lstdc++ -lncursesw
-DEBUGLIB = -lefence -lSegFault
+LIB    = -lpthread -lstdc++ -lncursesw
+DBGLIBS=
 #
-.PHONY = all clean fclean
+.PHONY = all dbg clean fclean
 #
-all: $(OBJS)
-	$(CC) $(IPATH) $(LPATH) $(CFLAGS) $(OBJS) -o $(NAME) $(LIB)
+all: executable
+#
+executable: $(OBJS)
+	$(CC) $(IPATH) $(LPATH) $(OBJS) -o $(NAME) $(LIB) $(DBGLIBS)
 %.o : %.cc
-	$(CC) -c $(IPATH) $(CFLAGS) $< -o $@
+	$(CC) -c $(IPATH) $(CFLAGS) $(OPTFLGS) $< -o $@
+#
+dbg: CFLAGS += -DDEBUG -ggdb3 -DS_LOGINF -DS_LOGDBG
+dbg: DBGLIBS= -lcppunit -lefence -lSegFault
+dbg: OPTFLGS=
+dbg: all
 #
 clean: fclean
 	$(RM) *o curses/*o *c~ *cc~ *hpp~ *~ Makefile~ \#* *.d
@@ -47,8 +53,11 @@ fclean:
 #
 re  : clean all
 #
+red : clean dbg
+#
 depend: $(DPDS)
 %.d : %.cc
 	rm -fr $@
 	$(CC) $(CFLAGS) $(IPATH) -MM $< -MF $@
+#
 include $(DPDS)
