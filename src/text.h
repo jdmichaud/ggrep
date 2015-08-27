@@ -51,17 +51,22 @@ public:
   }
   virtual void insert(char c) {
     m_text.insert(m_cur_pos.x++, std::string(1, c));
+    LOGDBG("m_text: " << m_text);
+    LOGDBG("m_cur_pos.x: " << m_cur_pos.x);
     (*this).update();
   }
   virtual void insert(char c, pos p) {
+    LOGDBG("m_text: " << m_text);
     // Not sure what to do here??
   }
   virtual void insert(const std::string &s) {
     m_text.insert(m_cur_pos.x, s);
     m_cur_pos.x += s.size();
+    LOGDBG("m_text: " << m_text);
     (*this).update();
   }
   virtual void insert(const std::string &s, pos p) {
+    LOGDBG("m_text: " << m_text);
     // Not sure what to do here??
   }
   virtual void get_char(char &c) {

@@ -18,6 +18,7 @@ public:
     m_input(b.get_eventid()) {}
 
   virtual void execute() {
+    LOGFN();
     m_text->insert((char) m_input.get_eventid());
   }
   virtual void unexecute() {

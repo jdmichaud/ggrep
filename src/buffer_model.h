@@ -7,12 +7,14 @@
 
 #include <list>
 #include <regex>
+#include <mutex>
 #include <memory>
 #include <fstream>
 
 #include "types.h"
 #include "model.h"
 #include "buffer.h"
+#include "processor.h"
 
 /*
  * This structure describes the text attributes to apply to a certain contigous
@@ -30,10 +32,10 @@ typedef std::list<std::list<tattr_t>> attr_list;
  * This structure is the logical representation of the filters set on each
  * buffer
  */
-typedef struct {
+struct filter_set_t {
   std::list<std::regex> filters;
   bool  land; // logical and if true, logical or otherwise
-} filter_set_t;
+};
 
 /*
  * Points to text hold by a Buffer and gives information as to where the model
@@ -45,29 +47,26 @@ public:
   BufferModel(std::unique_ptr<IBuffer> &&buffer);
   ~BufferModel();
 
-  DECLARE_ENTRY( BufferModel, line_number, uint );
   DECLARE_ENTRY( BufferModel, first_line_displayed, uint );
   DECLARE_ENTRY( BufferModel, attrs, attr_list );
   DECLARE_ENTRY( BufferModel, filter_set, filter_set_t );
+  DECLARE_ENTRY( BufferModel, filtered_lines, std::list<uint> );
 public:
   /*!
    * DECLARE_ENTRY macro do not work well on pointers to pointers...
    */
-  const char * const * get_text() const { return m_text; }
-  Update<char **> set_text() {
-    notify_callback_t f = std::bind(&BufferModel::notify_observers, this);
-    return Update<char **>(m_text, f);
+  char * const * get_text() {
+    return m_buffer->get_buffer(0);
   }
+  // Get the number of lines in the buffer
+  uint get_number_of_line() { return m_buffer->get_number_of_line(); }
 
 public:
-  char * const *get_buffer_content() { return m_buffer->get_buffer(0); }
-  void reinit_text();
-private:
-  std::unique_ptr<IBuffer> m_buffer;
   // Should we have the thread object in the model ? Looks ugly but I don't see
   // another easy and straighforward way... TODO: Improve this
-  std::thread m_filtering_thread;
-  char **m_text;
+  FilterEngine m_filter;
+private:
+  std::unique_ptr<IBuffer> m_buffer;
 };
 
 typedef std::list<std::unique_ptr<BufferModel> > buffer_list;

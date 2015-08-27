@@ -1,5 +1,7 @@
 #include <regex>
+#include "logmacros.h"
 #include "processor.h"
+#include "buffer_model.h"
 
 FilterEngine::FilterEngine(BufferModel &buffer_model) :
   ProcessorThread(std::bind(&FilterEngine::filter, this)),
@@ -29,10 +31,9 @@ bool FilterEngine::match(const char *line, const filter_set_t &filter_set) {
 void FilterEngine::filter() {
   std::list<std::regex> regexes;
   // Erase the content of the model first
-  memset(m_buffer_model.set_text().update(), 0,
-         m_buffer_model.get_line_number() + 1);
+  m_buffer_model.set_filtered_lines().update().clear();
   // Retrieve the content of the file buffer
-  char * const *file_text = m_buffer_model.get_buffer_content();
+  char * const *file_text = m_buffer_model.get_text();
   // Position the current character string to be added
   uint current_buffer_line = 0;
   // Position the current character string to be analyzed
@@ -48,8 +49,7 @@ void FilterEngine::filter() {
     if (m_signaled) {
       m_signaled = false; // reset it to false
       // Clear the model buffer
-      memset(m_buffer_model.set_text().update(), 0,
-             m_buffer_model.get_line_number() + 1);
+      m_buffer_model.set_filtered_lines().update().clear();
       // Position the current character string to be added
       current_buffer_line = 0;
       // Position the current character string to be analyzed
@@ -58,7 +58,8 @@ void FilterEngine::filter() {
     // Does the current line match the filter set
     if (match(*current_file_line, m_buffer_model.get_filter_set())) {
       // Yes, add it to the model
-      m_buffer_model.set_text().update()[current_buffer_line++] = *current_file_line;
+      m_buffer_model.set_filtered_lines().update().push_back(current_buffer_line++);
+      LOGDBG("number of selected line: " << m_buffer_model.get_filtered_lines().size());
     }
     // Look at the next line
     ++current_file_line;

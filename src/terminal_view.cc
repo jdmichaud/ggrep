@@ -58,26 +58,36 @@ uint TerminalView::init() {
 void TerminalView::notify_browser_changed(IObservable &observable) {
   LOGDBG("notify_browser_changed called")
   this->redraw_all();
+  // Refresh the screen
+  refresh();
 }
 
 void TerminalView::notify_buffer_changed(IObservable &observable) {
   LOGDBG("notify_buffer_changed called")
   this->redraw_all();
+  // Refresh the screen
+  refresh();
 }
 
 void TerminalView::notify_fbar_changed(IObservable &observable) {
   LOGDBG("notify_fbar_changed called")
   this->redraw_fbar(*static_cast<FBarModel *>(&observable));
+  // Refresh the screen
+  refresh();
 }
 
 void TerminalView::notify_prompt_changed(IObservable &observable) {
   LOGDBG("notify_prompt_changed called")
   this->redraw_prompt(*static_cast<PromptModel *>(&observable));
+  // Refresh the screen
+  refresh();
 }
 
 void TerminalView::notify_state_changed(IObservable &observable) {
   LOGDBG("notify_state_changed called")
   this->redraw_all();
+  // Refresh the screen
+  refresh();
 }
 
 void TerminalView::redraw_all() {
@@ -119,6 +129,8 @@ void TerminalView::redraw_fbar(FBarModel &fbar_model) {
 }
 
 void TerminalView::redraw_prompt(PromptModel &prompt_model) {
+  LOGDBG("redraw_prompt called with application state: " <<
+         _state_model.get_state());
   // move the cursor at the beginning of the line
   wmove(stdscr, this->_nlines - 1, 0);
   // Clear the line
@@ -134,19 +146,20 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
       std::max((int) std::min(prompt_model.get_cursor_position().x,
                              _prompt_string_index),
                (int) (prompt_model.get_cursor_position().x - this->_ncols + 1));
+    LOGDBG("_prompt_string_index: " << _prompt_string_index);
     // Print the prompt
     wprintw(stdscr, "%s",
             &prompt_model.get_prompt().c_str()[_prompt_string_index]);
   } else if (_state_model.get_state() == state_e::BROWSE_STATE ||
              _state_model.get_state() == state_e::FILTER_STATE) {
     // display the number of lines and the current top line (25 because 2^32 is
-    // the maximum number of lines we can load do we can at most display
+    // the maximum number of lines we can load so we can at display at most
     // 4294967296/4294967296)
     wmove(stdscr, this->_nlines - 1, this->_ncols - 25);
     const std::unique_ptr<BufferModel> &buffer =
       (*_browser_model.get_current_buffer());
     wprintw(stdscr, "%9i/%i",
-            buffer->get_first_line_displayed(), buffer->get_line_number());
+            buffer->get_first_line_displayed(), buffer->get_number_of_line());
     // If at the top of the file, display a Top tag
     if (buffer->get_first_line_displayed() == 0) {
       wmove(stdscr, this->_nlines - 1, this->_ncols - 3);
@@ -154,7 +167,7 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
     // If at the end of the file, display a End tag
     // TODO: don't assume two dead lines!
     } else if (buffer->get_first_line_displayed() >=
-               buffer->get_line_number() - this->_nlines + 2) {
+               buffer->get_number_of_line() - this->_nlines + 2) {
       wmove(stdscr, this->_nlines - 1, this->_ncols - 3);
       wprintw(stdscr, "End");
     }
@@ -172,6 +185,8 @@ void TerminalView::redraw_cursor(StateModel &state_model) {
   if (state_model.get_state() == state_e::CLOSE_STATE
       || state_model.get_state() == state_e::ADD_FILTER_STATE) {
     curs_set(1);
+    LOGDBG("_prompt_model.get_cursor_position().x: " << _prompt_model.get_cursor_position().x);
+    LOGDBG("_prompt_string_index: " << _prompt_string_index);
     wmove(stdscr, this->_nlines - 1,
           _prompt_model.get_cursor_position().x - _prompt_string_index);
   }

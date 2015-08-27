@@ -5,6 +5,8 @@
 #include "command.h"
 #include "input.h"
 
+#define MULTI_THREADED_USER_INPUT 1
+
 Controller::Controller(BrowserModel &browser_model,
                        FBarModel &fbar_model,
                        PromptModel &prompt_model,
@@ -202,12 +204,12 @@ void Controller::scroll_buffer_up(uint shift) {
 void Controller::scroll_buffer_down(uint shift) {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   // TODO: Get rid of constant. Prompt and header might take more than 1 line each!
-  if ((_browser_model.get_view_line_number() - 2) > buffer->get_line_number() ||
+  if ((_browser_model.get_view_line_number() - 2) > buffer->get_number_of_line() ||
       buffer->get_first_line_displayed() + shift >
-        (buffer->get_line_number() - (_browser_model.get_view_line_number() - 2)))
+        (buffer->get_number_of_line() - (_browser_model.get_view_line_number() - 2)))
   {
     buffer->set_first_line_displayed().update() =
-      buffer->get_line_number() - _browser_model.get_view_line_number() + 2;
+      buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2;
   } else {
     buffer->set_first_line_displayed().update() += shift;
   }
@@ -224,7 +226,7 @@ void Controller::scroll_buffer_page_down() {
 void Controller::scroll_buffer_end() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   buffer->set_first_line_displayed().update() =
-    buffer->get_line_number() - _browser_model.get_view_line_number() + 2;
+    buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2;
 }
 
 /*
@@ -232,17 +234,16 @@ void Controller::scroll_buffer_end() {
  */
 void Controller::add_filter(const std::string &filter) {
   LOGDBG("add a new filter: " << filter);
+  // Add the new regex to the set of filters of the current buffer
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   buffer->set_filter_set().update().filters.emplace_back(std::move(std::regex(filter)));
+  // Signal the filtering processor
+  buffer->m_filter.signal();
 }
 
 void Controller::reinit_current_buffer() {
   LOGDBG("reinit current buffer");
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
-  // Recopy the file buffer content into the model
-  buffer->reinit_text();
   // Clear the filter set
   buffer->set_filter_set().update().filters.clear();
-  // Stop the thread
-  // TODO !
 }

@@ -9,9 +9,9 @@
 
 #ifndef __FUNCTION_NAME__
     #ifdef WIN32   //WINDOWS
-        #define __FUNCTION_NAME__   __FUNCTION__  
+        #define __FUNCTION_NAME__   __FUNCTION__
     #else          //*NIX
-        #define __FUNCTION_NAME__   __func__ 
+        #define __FUNCTION_NAME__   __func__
     #endif
 #endif
 
@@ -54,5 +54,16 @@
 #else
 # define LOGERR(_trace_)
 #endif
+
+class FunLogger {
+public:
+  FunLogger(const std::string &function_name) : m_function_name(function_name) {
+    LOGDBG("Entering " << function_name);
+  }
+  ~FunLogger() { LOGDBG("Exiting " << m_function_name); }
+  std::string m_function_name;
+};
+
+#define LOGFN() FunLogger funlogger(__FUNCTION_NAME__);
 
 #endif //__LOGGING__H_

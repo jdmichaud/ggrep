@@ -14,7 +14,7 @@
 #include <functional>
 #include <condition_variable>
 
-#include "buffer_model.h"
+#include "logmacros.h"
 
 /**
  * A processor is a class representing a thread executing a task in the
@@ -49,7 +49,14 @@ public:
       LOGERR("thread already started!");
     m_signaled = true;
   }
-  void stop() { m_interrupted = true; }
+  ~ProcessorThread() {
+    LOGFN()
+    if (m_thread.joinable()) {
+      stop();
+      m_thread.join();
+    }
+  }
+  void stop() { m_interrupted = true; signal(); }
   void signal() { m_signal.notify_all(); m_signaled = true; }
   /*
    * There can be two states in which we are signaled:
@@ -71,6 +78,10 @@ private:
   std::mutex                m_wait_mutex;
   std::condition_variable   m_signal;
 };
+
+// Forward declaration
+class BufferModel;
+struct filter_set_t;
 
 class FilterEngine : public ProcessorThread {
 public:

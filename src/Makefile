@@ -33,9 +33,7 @@ DBGLIBS=
 #
 .PHONY = all dbg clean fclean
 #
-all: executable
-#
-executable: $(OBJS)
+all: $(OBJS)
 	$(CC) $(IPATH) $(LPATH) $(OBJS) -o $(NAME) $(LIB) $(DBGLIBS)
 %.o : %.cc
 	$(CC) -c $(IPATH) $(CFLAGS) $(OPTFLGS) $< -o $@

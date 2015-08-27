@@ -66,6 +66,7 @@ public:
 class Buffer : public IBuffer {
 public:
   Buffer(const std::string &filepath) : m_filepath(filepath) {
+    LOGDBG("Buffer constructor " << this);
     // Check the file type (binary or text)
     if (is_binary())
       throw OpenFileException(m_filepath, "unsupported file type: binary");
@@ -84,6 +85,7 @@ public:
   }
 
   ~Buffer() {
+    LOGDBG("Buffer destructor " << this);
     m_file.close();
     for (uint i = 0; i < m_nb_lines; ++i)
       if (m_buffer[i]) delete m_buffer[i];
