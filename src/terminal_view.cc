@@ -33,6 +33,8 @@ uint TerminalView::init() {
   initscr();
   // Send character by character, do not wait for newline
   cbreak();
+  // In halfdelay mode, getch will return after n tenth of a second
+  halfdelay(1);
   // Disable handling of the KEY_ENTER by the terminal
   //raw(); comment raw() because it gives control over Ctrl+C which we don't
   // want! In case our main thread hang, we want to be able to kill the
@@ -209,7 +211,9 @@ void TerminalView::redraw_cursor(StateModel &state_model) {
  * Special functions for controller interaction
  */
 void TerminalView::prompt(Controller &controller) {
-  int key = getch();
+  int key = 0;
+  while ((key = getch()) == ERR)
+    if (controller.is_interrupted()) return ;
   controller.inject(key);
 }
 

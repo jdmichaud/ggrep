@@ -55,7 +55,8 @@ void Controller::start() {
       LOGERR("While injecting event into context, runtime_error: " << e.what());
     }
   }
-  // We don't join the input_thread, because it will be waiting for an input.
+  // Join the input thread
+  input_thread.join();
 }
 
 void Controller::view_start() {
