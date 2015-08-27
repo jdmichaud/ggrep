@@ -34,6 +34,8 @@ uint TerminalView::init() {
   // Send character by character, do not wait for newline
   cbreak();
   // In halfdelay mode, getch will return after n tenth of a second
+  // This is important for the input thread to regularly check if the controller
+  // is interrupted
   halfdelay(1);
   // Disable handling of the KEY_ENTER by the terminal
   //raw(); comment raw() because it gives control over Ctrl+C which we don't
