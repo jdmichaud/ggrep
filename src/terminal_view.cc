@@ -42,7 +42,7 @@ uint TerminalView::init() {
   // want! In case our main thread hang, we want to be able to kill the
   // application
   nonl();
-  // Tell ncurses not echo typed character to the screen. We'll take care of
+  // Tell ncurses not to echo typed character to the screen. We'll take care of
   // that.
   noecho();
   // Catch special characters Backspace, Delete and the four arrow keys by
