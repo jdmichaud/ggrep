@@ -219,11 +219,6 @@ void TerminalView::prompt(Controller &controller) {
   controller.inject(key);
 }
 
-void TerminalView::new_buffer(Model &model) {
-  model.register_observer(std::bind( &TerminalView::notify_buffer_changed, this,
-                          std::placeholders::_1 ));
-}
-
 void TerminalView::get_view_size(uint &nlines, uint ncols) {
   nlines = this->_nlines;
   ncols = this->_ncols;

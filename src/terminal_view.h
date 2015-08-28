@@ -29,7 +29,6 @@ public:
 
   /* IView implementation */
   void prompt(Controller &);
-  void new_buffer(Model &);
   void get_view_size(uint &nlines, uint ncols);
 
 

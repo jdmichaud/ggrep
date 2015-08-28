@@ -24,6 +24,10 @@
 #define BACKTRACK           LOWER_BOUND_EVENT + 7
 #define UNDO                LOWER_BOUND_EVENT + 8
 #define FILTER_ADDED        LOWER_BOUND_EVENT + 9
+#define REDRAW_ALL          LOWER_BOUND_EVENT + 10
+#define REDRAW_FBAR         LOWER_BOUND_EVENT + 11
+#define REDRAW_PROMPT       LOWER_BOUND_EVENT + 12
+#define REDRAW_BROWSER      LOWER_BOUND_EVENT + 13
 
 #ifndef __EVENT_H__
 #define __EVENT_H__

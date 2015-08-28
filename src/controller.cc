@@ -1,3 +1,5 @@
+#include <thread>
+
 #include "types.h"
 #include "logmacros.h"
 #include "controller.h"
@@ -21,8 +23,15 @@ Controller::Controller(BrowserModel &browser_model,
   _context(Context(*this)),
   _user_event_producer(_event_queue),
   _processor_input_producer(_event_queue),
-  _event_consumer(_event_queue)
-  {}
+  _event_consumer(_event_queue),
+  _main_thread_id(std::this_thread::get_id())
+  {
+    using std::placeholders::_1;
+    _browser_model.register_observer(std::bind( &Controller::route_browser_callback, this, _1 ));
+    _fbar_model.register_observer(std::bind( &Controller::route_fbar_callback, this, _1 ));
+    _prompt_model.register_observer(std::bind( &Controller::route_prompt_callback, this, _1 ));
+    _state_model.register_observer(std::bind( &Controller::route_state_callback, this, _1 ));
+  }
 
 void Controller::bind_view(IView &view) {
   _views.push_back(&view);
@@ -32,6 +41,47 @@ void Controller::bind_view(IView &view) {
   uint nlines = 0, ncols = 0;
   view.get_view_size(nlines, ncols);
   set_view_size(nlines, ncols);
+}
+
+void route_browser_callback(IObservable &observable) {
+  // Are we on the main thread ?
+  if (_main_thread_id == std::this_thread::get_id()) {
+    // yes, then call the views directly
+    for (auto view: _views) view->notify_browser_callback(observable);
+  } else {
+    // otherwise, inject a REDRAW event
+    (*this).inject(Event(REDRAW_BROWSER));
+  }
+}
+void route_fbar_callback(IObservable &observable) {
+  // Are we on the main thread ?
+  if (_main_thread_id == std::this_thread::get_id()) {
+    // yes, then call the views directly
+    for (auto view: _views) view->notify_fbar_callback(observable);
+  } else {
+    // otherwise, inject a REDRAW event
+    (*this).inject(Event(REDRAW_FBAR));
+  }
+}
+void route_prompt_callback(IObservable &observable) {
+  // Are we on the main thread ?
+  if (_main_thread_id == std::this_thread::get_id()) {
+    // yes, then call the views directly
+    for (auto view: _views) view->notify_prompt_callback(observable);
+  } else {
+    // otherwise, inject a REDRAW event
+    (*this).inject(Event(REDRAW_PROMPT));
+  }
+}
+void route_state_callback(IObservable &observable) {
+  // Are we on the main thread ?
+  if (_main_thread_id == std::this_thread::get_id()) {
+    // yes, then call the views directly
+    for (auto view: _views) view->notify_state_callback(observable);
+  } else {
+    // otherwise, inject a REDRAW event
+    (*this).inject(Event(REDRAW_ALL));
+  }
 }
 
 // multi threaded input is a little buggy and not sure this is actually useful.

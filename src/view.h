@@ -6,6 +6,7 @@
 #define __VIEW_H__
 
 #include <vector>
+#include "observable.h"
 #include "model.h"
 
 class Controller;
@@ -16,9 +17,13 @@ public:
   /** Wait for a user interaction.
    */
   virtual void prompt(Controller &) = 0;
-  /** Signal the creation of a new buffer
-   */
-  virtual void new_buffer(Model &) = 0;
+  /** APIs used to hook views to the various callback event of model changes
+    */
+  void notify_browser_changed(IObservable &observable);
+  void notify_buffer_changed(IObservable &observable);
+  void notify_fbar_changed(IObservable &observable);
+  void notify_prompt_changed(IObservable &observable);
+  void notify_state_changed(IObservable &observable);
   /** Provide the view size for text browsing commands
   */
   virtual void get_view_size(uint &nlines, uint ncols) = 0;
