@@ -39,7 +39,8 @@ public:
 
 class ProcessorThread : public Processor {
 public:
-  ProcessorThread(std::function<void()> fn) : m_interrupted(false), m_function(fn) {}
+  ProcessorThread(std::function<void()> fn) : m_interrupted(false), 
+    m_function(fn) {}
   void start() {
     LOGDBG("starting thread");
     m_interrupted = false;
@@ -57,7 +58,8 @@ public:
     }
   }
   void stop() { m_interrupted = true; signal(); }
-  void signal() { m_signal.notify_all(); m_signaled = true; }
+  void signal() { LOGDBG("signled"); m_signal.notify_all(); m_signaled = true; }
+  inline void reset_signal() { m_signaled = false; }
   /*
    * There can be two states in which we are signaled:
    * 1. We were done and were waiting for something to do: this is managed by
@@ -92,6 +94,11 @@ public:
    * signal.
    */
   void filter();
+  /*
+   * As long as there is no filter or no text to filter, we wait. Unless we are
+   * interrupted.
+   */
+  void wait_for_something_to_filter(char * const *current_file_line);
 private:
   /*
    * Match a character string from the buffer with a particular filter set.

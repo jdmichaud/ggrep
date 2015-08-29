@@ -277,6 +277,7 @@ void Controller::add_filter(const std::string &filter) {
   // Add the new regex to the set of filters of the current buffer
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   buffer->set_filter_set().update().filters.emplace_back(std::move(std::regex(filter)));
+  LOGDBG("buffer->get_filter_set().filters.size(): " << buffer->get_filter_set().filters.size());
   // Signal the filtering processor
   buffer->m_filter.signal();
 }

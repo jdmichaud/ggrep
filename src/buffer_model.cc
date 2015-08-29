@@ -10,7 +10,7 @@ BufferModel::BufferModel(std::unique_ptr<IBuffer> &&buffer) :
 {
   LOGDBG("BufferModel creator " << this);
   // Should be started elsewhere. In the controller ?
-  //m_filter.start();
+  m_filter.start();
 }
 
 BufferModel::~BufferModel() {
