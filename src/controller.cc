@@ -7,6 +7,8 @@
 #include "command.h"
 #include "input.h"
 
+using std::placeholders::_1;
+
 #define MULTI_THREADED_USER_INPUT 1
 
 Controller::Controller(BrowserModel &browser_model,
@@ -26,11 +28,10 @@ Controller::Controller(BrowserModel &browser_model,
   _event_consumer(_event_queue),
   _main_thread_id(std::this_thread::get_id())
   {
-    using std::placeholders::_1;
-    _browser_model.register_observer(std::bind( &Controller::route_browser_callback, this, _1 ));
-    _fbar_model.register_observer(std::bind( &Controller::route_fbar_callback, this, _1 ));
-    _prompt_model.register_observer(std::bind( &Controller::route_prompt_callback, this, _1 ));
-    _state_model.register_observer(std::bind( &Controller::route_state_callback, this, _1 ));
+    _browser_model.register_observer(std::bind( &Controller::route_callback, this, REDRAW_BROWSER, _1 ));
+    _fbar_model.register_observer(std::bind( &Controller::route_callback, this, REDRAW_FBAR, _1 ));
+    _prompt_model.register_observer(std::bind( &Controller::route_callback, this, REDRAW_PROMPT, _1 ));
+    _state_model.register_observer(std::bind( &Controller::route_callback, this, REDRAW_STATE, _1 ));
   }
 
 void Controller::bind_view(IView &view) {
@@ -43,44 +44,33 @@ void Controller::bind_view(IView &view) {
   set_view_size(nlines, ncols);
 }
 
-void route_browser_callback(IObservable &observable) {
+void Controller::route_callback(uint event_id, IObservable &observable) {
   // Are we on the main thread ?
   if (_main_thread_id == std::this_thread::get_id()) {
     // yes, then call the views directly
-    for (auto view: _views) view->notify_browser_callback(observable);
+    switch (event_id) {
+      case REDRAW_BUFFER:
+        for (auto view: _views) view->notify_buffer_changed(observable);
+        break;
+      case REDRAW_BROWSER:
+        for (auto view: _views) view->notify_browser_changed(observable);
+        break;
+      case REDRAW_FBAR:
+        for (auto view: _views) view->notify_fbar_changed(observable);
+        break;
+      case REDRAW_PROMPT:
+        for (auto view: _views) view->notify_prompt_changed(observable);
+        break;
+      case REDRAW_STATE:
+        for (auto view: _views) view->notify_state_changed(observable);
+        break;
+      default:
+        // Browser callback will probably trigger a redraw all.
+        for (auto view: _views) view->notify_browser_changed(observable);
+      }
   } else {
     // otherwise, inject a REDRAW event
-    (*this).inject(Event(REDRAW_BROWSER));
-  }
-}
-void route_fbar_callback(IObservable &observable) {
-  // Are we on the main thread ?
-  if (_main_thread_id == std::this_thread::get_id()) {
-    // yes, then call the views directly
-    for (auto view: _views) view->notify_fbar_callback(observable);
-  } else {
-    // otherwise, inject a REDRAW event
-    (*this).inject(Event(REDRAW_FBAR));
-  }
-}
-void route_prompt_callback(IObservable &observable) {
-  // Are we on the main thread ?
-  if (_main_thread_id == std::this_thread::get_id()) {
-    // yes, then call the views directly
-    for (auto view: _views) view->notify_prompt_callback(observable);
-  } else {
-    // otherwise, inject a REDRAW event
-    (*this).inject(Event(REDRAW_PROMPT));
-  }
-}
-void route_state_callback(IObservable &observable) {
-  // Are we on the main thread ?
-  if (_main_thread_id == std::this_thread::get_id()) {
-    // yes, then call the views directly
-    for (auto view: _views) view->notify_state_callback(observable);
-  } else {
-    // otherwise, inject a REDRAW event
-    (*this).inject(Event(REDRAW_ALL));
+    (*this).inject(event_id);
   }
 }
 
@@ -171,14 +161,13 @@ bool Controller::create_buffer(const std::string &filepath) {
     // Create the buffer model
     BufferModel *buffer_model =
       new BufferModel(_buffer_factory.create_buffer(filepath));
-    // Register the views binded to the controller
-    for (auto view: _views) {
-      // Attach the browser's observer (the view's callback) to the buffer
-      view->new_buffer(*buffer_model);
-    }
+    // Attach the controller observer to the newly created buffer
+    buffer_model->register_observer(std::bind( &Controller::route_callback, 
+                                               this, REDRAW_BUFFER, _1 ));
     // Add the buffer model to the browser model
     _browser_model.emplace_buffer(
       std::move(std::unique_ptr<BufferModel>(buffer_model)));
+    // Generate the FILE_OPENED event into the state machine
     _context.inject(Event(FILE_OPENED));
   }
   catch (std::runtime_error e) {

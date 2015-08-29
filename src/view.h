@@ -19,11 +19,11 @@ public:
   virtual void prompt(Controller &) = 0;
   /** APIs used to hook views to the various callback event of model changes
     */
-  void notify_browser_changed(IObservable &observable);
-  void notify_buffer_changed(IObservable &observable);
-  void notify_fbar_changed(IObservable &observable);
-  void notify_prompt_changed(IObservable &observable);
-  void notify_state_changed(IObservable &observable);
+  virtual void notify_browser_changed(IObservable &observable) = 0;
+  virtual void notify_buffer_changed(IObservable &observable) = 0;
+  virtual void notify_fbar_changed(IObservable &observable) = 0;
+  virtual void notify_prompt_changed(IObservable &observable) = 0;
+  virtual void notify_state_changed(IObservable &observable) = 0;
   /** Provide the view size for text browsing commands
   */
   virtual void get_view_size(uint &nlines, uint ncols) = 0;

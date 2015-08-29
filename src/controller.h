@@ -29,7 +29,7 @@
 #include "input.h"
 
 
-class Controller {
+class Controller
 {
 public:
   Controller(BrowserModel &browser_model,
@@ -53,10 +53,7 @@ public:
     * b. an REDRAW event injected in the Controller state machine which will be
     *    handled by the main thread (see a)
     */
-  void route_browser_callback(IObservable &observable);
-  void route_fbar_callback(IObservable &observable);
-  void route_prompt_callback(IObservable &observable);
-  void route_state_callback(IObservable &observable);
+  void route_callback(uint event_id, IObservable &observable);
   /* thread related functions */
   inline bool is_interrupted() { return _interrupted; }
   inline void interrupt() { _interrupted = true; }
