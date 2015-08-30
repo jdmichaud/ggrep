@@ -24,7 +24,6 @@ public:
     m_controller.scroll_buffer_up(1);
   }
 private:
-  IText *m_text;
 };
 
 /*!
@@ -42,7 +41,6 @@ public:
     m_controller.scroll_buffer_down(1);
   }
 private:
-  IText *m_text;
 };
 
 /*!
@@ -60,7 +58,6 @@ public:
     m_controller.scroll_buffer_page_up();
   }
 private:
-  IText *m_text;
 };
 
 /*!
@@ -80,7 +77,6 @@ public:
     //m_controller.set_buffer_current_line(m_previous_current_line);
   }
 private:
-  IText *m_text;
   uint m_previous_current_line;
 };
 
@@ -101,7 +97,6 @@ public:
     //m_controller.set_buffer_current_line(m_previous_current_line);
   }
 private:
-  IText *m_text;
   uint m_previous_current_line;
 };
 
@@ -122,7 +117,6 @@ public:
     m_controller.scroll_buffer_page_down();
   }
 private:
-  IText *m_text;
 };
 
 
