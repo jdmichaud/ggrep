@@ -48,7 +48,7 @@ private:
 class IBuffer {
 public:
   /*!
-   * Provide a pointer to a pointer to the text line number line_number.
+   * Provide a pointer to a pointer to the text.
    * Increment this pointer to get the next line.
    * Didn't use iterator to have no overhead at all.
    */
