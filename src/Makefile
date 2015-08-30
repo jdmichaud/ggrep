@@ -19,16 +19,11 @@ OBJS = $(SRCS:.cc=.o)
 DPDS = $(SRCS:.cc=.d)
 #
 UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-	CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -Wfatal-errors -Wno-unused-parameter -DS_LOGERR
-endif
-ifeq ($(UNAME_S),Darwin)
-	CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -stdlib=libc++ -Wfatal-errors -Wno-unused-parameter -DS_LOGERR
-endif
+CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -stdlib=libc++ -Wfatal-errors -Wno-unused-parameter -DS_LOGERR
 OPTFLGS= -O3 -Os
 IPATH  = -I../ -I../src -I../../loglite
 LPATH  =
-LIB    = -lpthread -lstdc++ -lncursesw
+LIB    = -lpthread -lstdc++ -lncursesw -stdlib=libc++
 DBGLIBS=
 #
 .PHONY = all dbg clean fclean
