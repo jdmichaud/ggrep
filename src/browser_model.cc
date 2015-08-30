@@ -4,8 +4,7 @@
 
 BrowserModel::BrowserModel() :
   m_current_buffer(m_buffers.end()), m_view_line_number(0)
-{
-}
+{}
 
 buffer_list::const_iterator BrowserModel::get_current_buffer()
 {

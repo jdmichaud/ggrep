@@ -33,11 +33,11 @@ public:
 
 
   uint init();
-  void notify_browser_changed(IObservable &observable);
-  void notify_buffer_changed(IObservable &observable);
-  void notify_fbar_changed(IObservable &observable);
-  void notify_prompt_changed(IObservable &observable);
-  void notify_state_changed(IObservable &observable);
+  void notify_browser_changed();
+  void notify_buffer_changed();
+  void notify_fbar_changed();
+  void notify_prompt_changed();
+  void notify_state_changed();
 
 private:
   void redraw_buffer(BufferModel &);

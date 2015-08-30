@@ -33,7 +33,7 @@ typedef std::list<std::list<tattr_t>> attr_list;
  * buffer
  */
 struct filter_set_t {
-  std::list<std::regex> filters;
+  std::list< std::pair<std::string, std::regex> > filters;
   bool  land; // logical and if true, logical or otherwise
 };
 

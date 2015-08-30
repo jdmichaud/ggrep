@@ -15,6 +15,19 @@
 #include "logmacros.h"
 
 /*
+ * Placeholder state to host default event handlers
+ */
+class DefaultState : public State<DefaultState> {
+public:
+  DefaultState(Context &context, Controller &controller, IState *parent_state);
+  void enter(const IEvent &) {}
+  void exit(const IEvent &) {}
+  void suspend(const IEvent &) {}
+  void resume(const IEvent &) {}
+  void update() {}
+};
+
+/*
  * No file opened in this state
  */
 class CloseState : public State<CloseState>, public OneLinerText {

@@ -41,17 +41,26 @@ public:
   /**
    * A view injects a character through this api.
    */
-  void inject(int key);
+  void inject_key(int key);
+  /**
+   * Inject an event through this api.
+   */
+  void inject(const Event &&);
   /** Bind a view to the controller. The controller is supposed to interact only
     * with models and not the view. But this priviledged access to the view is
     * restricted to special interaction like requesting an input (prompt).
     */
   void bind_view(IView &);
-  /** These functions route the model updates call to either:
+  /** This function route the model updates call to either:
     * a. all the views binded to the controller if the calling thread is the
     *    main thread
     * b. an REDRAW event injected in the Controller state machine which will be
     *    handled by the main thread (see a)
+    */
+  void _route_callback(uint event_id);
+  /**
+    * Proxu signature so we ignore the observable parameters which comes 
+    * with the callback type used in our observer pattern
     */
   void route_callback(uint event_id, IObservable &observable);
   /* thread related functions */

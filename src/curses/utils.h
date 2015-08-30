@@ -22,16 +22,17 @@ uint print_line(WINDOW *w, char *data, size_t max_char);
  * Will repeatldy call print_line on all the lines up to _nline - 1
  * The lines will start at column
  * buffer_model contains the list of string to display
- * first_line is the index of the line to be displayed first
+ * r is a range which contains the index of the line we want to print
  * first_column in the index of the column to be displayed first
- * offset is where the print function shall start printing on the screen
  * lines in the number of lines in available for display
  * columns in the number of columns in available for display
+ * xoffset is where the print function shall start printing on the screen
  * if wordwrap is true, string will be displayed entirely on several lines.
  */
-void print_buffer(WINDOW *w, BufferModel &buffer_model,
-                  uint first_line, uint first_column, uint lines, uint columns,
-                  uint offset, bool wordwrap);
+template <typename range_type>
+void print_buffer(WINDOW *w, char * const *buffer, const range_type& r, 
+                  uint first_column, uint lines, uint columns, 
+                  uint xoffset, bool wordwrap);
 
 
 #endif // __CURSES_H__

@@ -9,6 +9,8 @@ BufferModel::BufferModel(std::unique_ptr<IBuffer> &&buffer) :
     m_first_line_displayed(0), m_filter(*this), m_buffer(std::move(buffer))
 {
   LOGDBG("BufferModel creator " << this);
+  // By default, we will AND the filtering matches
+  m_filter_set.land = true;
   // Should be started elsewhere. In the controller ?
   m_filter.start();
 }

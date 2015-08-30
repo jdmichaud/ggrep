@@ -10,18 +10,21 @@ FilterEngine::FilterEngine(BufferModel &buffer_model) :
 
 bool FilterEngine::match(const char *line, const filter_set_t &filter_set) {
   bool match = false;
+  std::cmatch matches;
   if (filter_set.land) {
     // If we want to AND the results
     for (const auto &re: filter_set.filters) {
       // If just one regex does not match, exit
-      if (!(match = std::regex_match(line, re)))
+      if (!(match = std::regex_search(line, matches, re.second, 
+                                      std::regex_constants::match_any | 
+                                      std::regex_constants::match_not_null)))
         return false;
     }
   } else {
     // If we want to OR the results
     for (const auto &re: filter_set.filters) {
       // If just one regex does match, exit
-      if ((match = std::regex_match(line, re)))
+      if ((match = std::regex_search(line, matches, re.second)))
         return true;
     }
   }

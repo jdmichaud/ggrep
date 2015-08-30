@@ -11,6 +11,19 @@
 #define CLOSE_STATE_PROMPT "filename: "
 #define ADD_FILTER_STATE_PROMPT "add filter: "
 
+DefaultState::DefaultState(Context &context, Controller &controller,
+                           IState *parent_state) :
+  State(context, controller, parent_state,
+    {
+      { new Event(REDRAW_BUFFER), [&controller](const IEvent& b) { LOGDBG("REDRAW_BUFFER"); controller._route_callback(REDRAW_BROWSER); } },
+      { new Event(REDRAW_BROWSER),[&controller](const IEvent& b) { LOGDBG("REDRAW_BROWSER"); controller._route_callback(REDRAW_BROWSER); } },
+      { new Event(REDRAW_FBAR),   [&controller](const IEvent& b) { LOGDBG("REDRAW_FBAR"); controller._route_callback(REDRAW_FBAR); } },
+      { new Event(REDRAW_PROMPT), [&controller](const IEvent& b) { LOGDBG("REDRAW_PROMPT"); controller._route_callback(REDRAW_PROMPT); } },
+      { new Event(REDRAW_STATE),  [&controller](const IEvent& b) { LOGDBG("REDRAW_STATE"); controller._route_callback(REDRAW_STATE); } },
+      { new Event(REDRAW_ALL),    [&controller](const IEvent& b) { LOGDBG("REDRAW_ALL"); controller._route_callback(REDRAW_ALL); } },
+    }, state_e::DEFAULT_STATE)
+{ }
+
 CloseState::CloseState(Context &context, Controller &controller,
                        IState *parent_state) :
   State(context, controller, parent_state,

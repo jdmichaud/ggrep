@@ -20,6 +20,7 @@
  * Application state
  */
 enum class state_e {
+  DEFAULT_STATE,
   CLOSE_STATE,
   OPEN_STATE,
   BROWSE_STATE,

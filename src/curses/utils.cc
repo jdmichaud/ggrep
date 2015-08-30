@@ -1,7 +1,12 @@
+
 #include <curses.h>
+
+#include <list>
 #include <algorithm>
+
 #include "buffer_model.h"
 #include "utils.h"
+#include "range.h"
 
 uint print_line(WINDOW *w, const char *data, size_t max_char, uint xoffset) {
   // Get the maximum character we can print
@@ -16,19 +21,18 @@ uint print_line(WINDOW *w, const char *data, size_t max_char, uint xoffset) {
   return printed_char;
 }
 
-void print_buffer(WINDOW *w, BufferModel &buffer_model,
-                  uint first_line, uint first_column, uint lines, uint columns,
+template <typename range_type>
+void print_buffer(WINDOW *w, char * const *buffer, const range_type& r, 
+                  uint first_column, uint lines, uint columns, 
                   uint xoffset, bool wordwrap) {
   LOGFN();
   // We will print nlines - prompt - fbar
   uint nb_line = lines - 2; // TODO: don't assume two dead lines!
-  // next_line is the read pointer
-  uint next_line = first_line;
-  // Get the number of lines in the buffer
-  uint buffer_line_number = buffer_model.get_number_of_line();
-  while (nb_line > 0 && next_line < buffer_line_number) {
+  // position on the screen
+  uint screen_line = 0;
+  for (int i : r) {
     // Get the line to print
-    const char *line = buffer_model.get_text()[next_line];
+    const char *line = buffer[i];
     // If the line is NULL, just move to the next line
     if (line != nullptr) {
       // Advance by the columns shift
@@ -39,20 +43,21 @@ void print_buffer(WINDOW *w, BufferModel &buffer_model,
       uint printed_char = 0;
       do {
         // Move cursor at the beginning of the line
-        wmove(w, next_line - first_line + 1, xoffset); // TODO: don't assume one line header
+        wmove(w, screen_line + 1, xoffset); // TODO: don't assume one line header
         // Print the line
         printed_char += print_line(w, line, columns - xoffset, xoffset);
-        /// Move the line header to the rest of the string
-        line += columns - first_line;
-        // Decrement the number of lines remaining on the screen and in the buffer
+        // Move the line header to the rest of the string
+        line += printed_char;
+        // Decrement the number of lines remaining on the screen
         nb_line--;
         // We will stop printing if we don't wordwrap, or we printed the full line
         // or there is no more room on the screen.
-      } while (wordwrap && printed_char < char_to_print
-               && nb_line > 0);
+      } while (nb_line > 0 && wordwrap && printed_char < char_to_print);
     }
     // Move to next line in read buffer
-    next_line++;
+    screen_line++;
+    // If we reach the end of the screen, break
+    if (!nb_line) break;
   }
   // Clear the rest of the lines
   int x, y;
@@ -64,3 +69,11 @@ void print_buffer(WINDOW *w, BufferModel &buffer_model,
   }
 }
 
+template void print_buffer< std::list<uint> >
+                  (WINDOW *w, char * const *buffer, const std::list<uint>& r, 
+                  uint first_column, uint lines, uint columns, 
+                  uint xoffset, bool wordwrap);
+template void print_buffer< range >
+                  (WINDOW *w, char * const *buffer, const range& r, 
+                  uint first_column, uint lines, uint columns, 
+                  uint xoffset, bool wordwrap);

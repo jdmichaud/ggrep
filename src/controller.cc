@@ -1,4 +1,5 @@
 #include <thread>
+#include <functional>
 
 #include "types.h"
 #include "logmacros.h"
@@ -45,36 +46,39 @@ void Controller::bind_view(IView &view) {
 }
 
 void Controller::route_callback(uint event_id, IObservable &observable) {
+  (*this)._route_callback(event_id);
+}
+
+void Controller::_route_callback(uint event_id) {
   // Are we on the main thread ?
   if (_main_thread_id == std::this_thread::get_id()) {
     // yes, then call the views directly
     switch (event_id) {
       case REDRAW_BUFFER:
-        for (auto view: _views) view->notify_buffer_changed(observable);
+        for (auto view: _views) view->notify_buffer_changed();
         break;
       case REDRAW_BROWSER:
-        for (auto view: _views) view->notify_browser_changed(observable);
+        for (auto view: _views) view->notify_browser_changed();
         break;
       case REDRAW_FBAR:
-        for (auto view: _views) view->notify_fbar_changed(observable);
+        for (auto view: _views) view->notify_fbar_changed();
         break;
       case REDRAW_PROMPT:
-        for (auto view: _views) view->notify_prompt_changed(observable);
+        for (auto view: _views) view->notify_prompt_changed();
         break;
       case REDRAW_STATE:
-        for (auto view: _views) view->notify_state_changed(observable);
+        for (auto view: _views) view->notify_state_changed();
         break;
       default:
         // Browser callback will probably trigger a redraw all.
-        for (auto view: _views) view->notify_browser_changed(observable);
+        for (auto view: _views) view->notify_browser_changed();
       }
   } else {
     // otherwise, inject a REDRAW event
-    (*this).inject(event_id);
+    (*this).inject(Event(event_id));
   }
 }
 
-// multi threaded input is a little buggy and not sure this is actually useful.
 #ifdef MULTI_THREADED_USER_INPUT
 void Controller::start() {
   // Spawn the view thread
@@ -109,13 +113,18 @@ void Controller::start() {
       _views.front()->prompt(*this);
 }
 
-
-
-void Controller::inject(int key) {
-  LOGDBG("Controller::inject called with key: " << key <<
+void Controller::inject_key(int key) {
+ LOGDBG("Controller::inject_key called with key: " << key <<
          " (" << std::oct << key << std::dec << ")");
   try {
-    const Event e = _input_factory.build_input(key);
+    (*this).inject(std::move(_input_factory.build_input(key)));
+  } catch (std::runtime_error e) {
+    LOGERR("While creating event, runtime_error: " << e.what());
+  }
+}
+
+void Controller::inject(const Event &&e) {
+  try {
     LOGDBG("e.get_eventid(): " << e.get_eventid());
 #ifdef MULTI_THREADED_USER_INPUT
     _user_event_producer.produce(std::move(e));
@@ -124,8 +133,6 @@ void Controller::inject(int key) {
 #endif
   } catch (UnhandledEvent e) {
     LOGERR("While creating event, UnhandledEvent: " << e.what());
-  } catch (std::runtime_error e) {
-    LOGERR("While creating event, runtime_error: " << e.what());
   }
 }
 
@@ -276,7 +283,8 @@ void Controller::add_filter(const std::string &filter) {
   LOGDBG("add a new filter: " << filter);
   // Add the new regex to the set of filters of the current buffer
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
-  buffer->set_filter_set().update().filters.emplace_back(std::move(std::regex(filter)));
+  buffer->set_filter_set().update().filters.emplace_back(
+    std::move(std::make_pair(filter, std::regex(filter))));
   LOGDBG("buffer->get_filter_set().filters.size(): " << buffer->get_filter_set().filters.size());
   // Signal the filtering processor
   buffer->m_filter.signal();

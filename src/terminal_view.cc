@@ -6,6 +6,7 @@
 #include "terminal_view.h"
 #include "state.h"
 #include "curses/utils.h"
+#include "range.h"
 
 TerminalView::TerminalView(BrowserModel &browser_model, FBarModel &fbar_model,
                            PromptModel &prompt_model, StateModel &state_model) :
@@ -16,11 +17,6 @@ TerminalView::TerminalView(BrowserModel &browser_model, FBarModel &fbar_model,
   _state_model(state_model),
   _prompt_string_index(0)
 {
-  using std::placeholders::_1;
-  _browser_model.register_observer(std::bind( &TerminalView::notify_browser_changed, this, _1 ));
-  _fbar_model.register_observer(std::bind( &TerminalView::notify_fbar_changed, this, _1 ));
-  _prompt_model.register_observer(std::bind( &TerminalView::notify_prompt_changed, this, _1 ));
-  _state_model.register_observer(std::bind( &TerminalView::notify_state_changed, this, _1 ));
 }
 
 TerminalView::~TerminalView() {
@@ -59,35 +55,35 @@ uint TerminalView::init() {
   return 0;
 }
 
-void TerminalView::notify_browser_changed(IObservable &observable) {
+void TerminalView::notify_browser_changed() {
   LOGDBG("notify_browser_changed called")
   this->redraw_all();
   // Refresh the screen
   refresh();
 }
 
-void TerminalView::notify_buffer_changed(IObservable &observable) {
+void TerminalView::notify_buffer_changed() {
   LOGDBG("notify_buffer_changed called")
   this->redraw_all();
   // Refresh the screen
   refresh();
 }
 
-void TerminalView::notify_fbar_changed(IObservable &observable) {
+void TerminalView::notify_fbar_changed() {
   LOGDBG("notify_fbar_changed called")
-  this->redraw_fbar(*static_cast<FBarModel *>(&observable));
+  this->redraw_fbar(_fbar_model);
   // Refresh the screen
   refresh();
 }
 
-void TerminalView::notify_prompt_changed(IObservable &observable) {
+void TerminalView::notify_prompt_changed() {
   LOGDBG("notify_prompt_changed called")
-  this->redraw_prompt(*static_cast<PromptModel *>(&observable));
+  this->redraw_prompt(_prompt_model);
   // Refresh the screen
   refresh();
 }
 
-void TerminalView::notify_state_changed(IObservable &observable) {
+void TerminalView::notify_state_changed() {
   LOGDBG("notify_state_changed called")
   this->redraw_all();
   // Refresh the screen
@@ -104,11 +100,28 @@ void TerminalView::redraw_all() {
 void TerminalView::redraw_buffer(BufferModel &buffer_model) {
   LOGDBG("TerminalView::redraw_buffer called");
   if (_state_model.get_state() == state_e::OPEN_STATE
-      || _state_model.get_state() == state_e::BROWSE_STATE
-      || _state_model.get_state() == state_e::FILTER_STATE)
+      || _state_model.get_state() == state_e::BROWSE_STATE)
   {
-    print_buffer(stdscr, buffer_model, buffer_model.get_first_line_displayed(),
+    print_buffer(stdscr, buffer_model.get_text(), 
+                 range(buffer_model.get_first_line_displayed(),
+                       buffer_model.get_number_of_line()),
                  0, this->_nlines, this->_ncols, 0, false);
+    redraw_prompt(_prompt_model);
+  }
+  if (_state_model.get_state() == state_e::FILTER_STATE) {
+    // If filter state is active
+    if (buffer_model.get_filter_set().filters.empty()) {
+      // But no line filtered, display the full buffer
+      print_buffer(stdscr, buffer_model.get_text(), 
+                   range(buffer_model.get_first_line_displayed(),
+                         buffer_model.get_number_of_line()),
+                   0, this->_nlines, this->_ncols, 0, false);
+    } else {
+      // else display only the filtered lines
+      print_buffer(stdscr, buffer_model.get_text(), 
+                   buffer_model.get_filtered_lines(),
+                   0, this->_nlines, this->_ncols, 0, false);
+    }
     redraw_prompt(_prompt_model);
   }
 }
@@ -154,16 +167,32 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
     // Print the prompt
     wprintw(stdscr, "%s",
             &prompt_model.get_prompt().c_str()[_prompt_string_index]);
-  } else if (_state_model.get_state() == state_e::BROWSE_STATE ||
-             _state_model.get_state() == state_e::FILTER_STATE) {
+  } else if (_state_model.get_state() == state_e::BROWSE_STATE) {
+    const std::unique_ptr<BufferModel> &buffer =
+      (*_browser_model.get_current_buffer());
     // display the number of lines and the current top line (25 because 2^32 is
     // the maximum number of lines we can load so we can at display at most
     // 4294967296/4294967296)
     wmove(stdscr, this->_nlines - 1, this->_ncols - 25);
-    const std::unique_ptr<BufferModel> &buffer =
-      (*_browser_model.get_current_buffer());
     wprintw(stdscr, "%9i/%i",
             buffer->get_first_line_displayed(), buffer->get_number_of_line());
+  } else if (_state_model.get_state() == state_e::FILTER_STATE) {
+    const std::unique_ptr<BufferModel> &buffer =
+      (*_browser_model.get_current_buffer());
+    // display the the current top line, the number of filtered lines and the 
+    // total number of lines and  (32 because 2^32 is the maximum number of 
+    // lines we can load so we can at display at most
+    // 4294967296/4294967296/4294967296)
+    wmove(stdscr, this->_nlines - 1, this->_ncols - 32);
+    wprintw(stdscr, "%9i/%i/%i",
+            buffer->get_first_line_displayed(),
+            buffer->get_filtered_lines().size(),
+            buffer->get_number_of_line());
+  }
+  if (_state_model.get_state() == state_e::BROWSE_STATE ||
+      _state_model.get_state() == state_e::FILTER_STATE) {    
+    const std::unique_ptr<BufferModel> &buffer =
+      (*_browser_model.get_current_buffer());
     // If at the top of the file, display a Top tag
     if (buffer->get_first_line_displayed() == 0) {
       wmove(stdscr, this->_nlines - 1, this->_ncols - 3);
