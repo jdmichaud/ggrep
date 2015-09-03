@@ -22,10 +22,10 @@
   struct timeval __tv;                                                         \
   gettimeofday(&__tv, NULL);                                                   \
   time_t __now = time(0);                                                      \
-  struct tm _t;                                                                \
-  gmtime_r(&__now, &_t);                                                       \
+  struct tm __t;                                                               \
+  gmtime_r(&__now, &__t);                                                      \
   char timestamp[255];                                                         \
-  strftime(timestamp, 255, "%d/%m/%y %k:%M:%S", &_t);                          \
+  strftime(timestamp, 255, "%d/%m/%y %k:%M:%S", &__t);                         \
   logfile << _prefix_ << ",";                                                  \
   logfile << timestamp << "(" << __tv.tv_usec << "),";                         \
   logfile << std::this_thread::get_id() << ",";                                \

@@ -268,18 +268,4 @@ public:
   }
 };
 
-class InputFactory {
-public:
-  Input&& build_input(uint keycode) {
-    if (isprint(keycode))             return std::move(Printable(keycode));
-    else if (isarrow(keycode))        return std::move(Arrow(keycode));
-    else if (isnav(keycode))          return std::move(Nav(keycode));
-    else if (isfunctionkey(keycode))  return std::move(Function(keycode));
-    else if (isctrl(keycode))         return std::move(Ctrl(keycode));
-
-    LOGERR("InputFactory: unknown keycode " << keycode);
-    throw std::runtime_error("unknown keycode " + std::to_string(keycode));
-  }
-};
-
 #endif //__INPUT_H__

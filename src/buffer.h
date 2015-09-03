@@ -22,6 +22,21 @@
 
 #define LINE_STATIC_SIZE 256
 
+/*
+ * This structure describes the text attributes to apply to a certain contigous
+ * text zone
+ */
+typedef struct {
+  int attrs_mask;
+  uint start_pos;
+  uint end_pos;
+} tattr_t;
+
+typedef std::list<std::list<tattr_t>> attr_list;
+
+/*
+ * Custom exception raised when an error occurs on opening a file
+ */
 class OpenFileException : public std::exception {
 public:
   OpenFileException(const std::string &filepath) :
@@ -48,25 +63,44 @@ private:
 class IBuffer {
 public:
   /*!
+   * Is the content of the buffer is binary (or text)
+   */
+  virtual bool is_binary() = 0;
+  /*!
    * Provide a pointer to a pointer to the text.
    * Increment this pointer to get the next line.
    * Didn't use iterator to have no overhead at all.
    */
-  virtual char** get_buffer(uint line_number) = 0;
+  virtual char **get_text() const = 0;
   /*!
-   * Get the number of lines in the buffer.
+   * Get/Set the number of lines in the buffer.
    */
-  virtual uint get_number_of_line() = 0;
+  virtual uint get_number_of_line() const = 0;
+  virtual void set_number_of_line(uint) = 0;
   /*!
-   * Is the content of the buffer is binary (or text)
+   * Get/Set attributes of the buffer
    */
-  virtual bool is_binary() = 0;
+  virtual attr_list &get_attrs() = 0;
+  /*!
+   * Get/Set the current pointer (first line displayed) of the buffer
+   */
+  virtual uint get_first_line_displayed() const = 0;
+  virtual void set_first_line_displayed(uint) = 0;
 };
 
 class Buffer : public IBuffer {
+  virtual attr_list &get_attrs() { return m_attrs; }
+  virtual uint get_first_line_displayed() const { return m_first_line_displayed; }
+  virtual void set_first_line_displayed(uint i) { m_first_line_displayed = i; }
+private:
+  uint m_first_line_displayed;
+  attr_list m_attrs;
+};
+
+class FileBuffer : public Buffer {
 public:
-  Buffer(const std::string &filepath) : m_filepath(filepath) {
-    LOGDBG("Buffer constructor " << this);
+  FileBuffer(const std::string &filepath) : m_filepath(filepath) {
+    LOGDBG("FileBuffer constructor " << this);
     // Check the file type (binary or text)
     if (is_binary())
       throw OpenFileException(m_filepath, "unsupported file type: binary");
@@ -81,11 +115,11 @@ public:
     m_buffer[m_nb_lines] = 0;
     // Load the whole file
     (*this).load({0, -1});
-    LOGINF("Buffer loaded (" << this << ")");
+    LOGINF("FileBuffer loaded (" << this << ")");
   }
 
-  ~Buffer() {
-    LOGDBG("Buffer destructor " << this);
+  ~FileBuffer() {
+    LOGDBG("FileBuffer destructor " << this);
     m_file.close();
     for (uint i = 0; i < m_nb_lines; ++i)
       if (m_buffer[i]) delete m_buffer[i];
@@ -95,20 +129,22 @@ public:
   /*
    * Get pointers to the line indicated by line_number
    */
-  char** get_buffer(uint line_number) {
-    return &m_buffer[line_number];
+  char** get_text() const {
+    LOGDBG("get_text");
+    return m_buffer;
   }
 
   /*
    * Get the number of lines of the text file.
    * At the end of this call, file header is at the beginning of the file
+   * This function is a memoizer.
    */
-  uint get_number_of_line() {
+  uint get_number_of_line() const {
     static uint line_count = get_number_of_line_();
     return line_count;
   }
 
-  uint get_number_of_line_() {
+  uint get_number_of_line_() const {
     std::ifstream ifs(m_filepath);
     // new lines will be skipped unless we stop it from happening:
     //m_file.unsetf(std::ios_base::skipws); really ???
@@ -121,13 +157,17 @@ public:
     return line_count;
   }
 
+  /*
+   * This functions does nothing on a file buffer
+   */
+  void set_number_of_line(uint) { /* Not applicable */ };
 
   /*
    * This method is just an heuristic. Could be completely wrong.
    * If it is, there is a bigger chance that it returns false instead of true,
    * which is acceptable. We can always open binary file as text, but not being
    * able to open legitimate text file would be a problem.
-   * This function is memoizer.
+   * This function is a memoizer.
    */
   bool is_binary() {
     static bool is_bin = is_file_binary(m_filepath, 100);
@@ -230,7 +270,7 @@ protected:
   uint                m_nb_lines;
 
 private:
-  Buffer(const Buffer &b) = delete;
+  FileBuffer(const FileBuffer &b) = delete;
 };
 
 #endif // __BUFFER_H__

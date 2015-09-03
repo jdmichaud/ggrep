@@ -108,4 +108,19 @@ public:
   }
 };
 
+inline bool isredraw(uint event_id) {
+  return (event_id == REDRAW_ALL
+          || event_id == REDRAW_FBAR
+          || event_id == REDRAW_PROMPT
+          || event_id == REDRAW_BUFFER
+          || event_id == REDRAW_BROWSER
+          || event_id == REDRAW_STATE);
+}
+
+class Redraw : public Event {
+public:
+  Redraw(uint eventid) : Event(eventid) {}
+  ~Redraw() {}
+};
+
 #endif //__EVENT_H__

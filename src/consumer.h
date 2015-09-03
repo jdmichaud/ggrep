@@ -23,6 +23,12 @@ public:
    */
   virtual T take() = 0;
 
+  /*!
+   * Assign the element at the top of the queue wihtout poping it.
+   * If no items are available, the pointer is assigned nullptr.
+   */
+  virtual T const * peep() = 0;
+
 protected:
   IConsumer() {}
 };
@@ -40,6 +46,19 @@ public:
   virtual T take()
   {
     return m_work_queue.pop(true); // blocking
+  }
+
+  virtual T const * peep()
+  {
+    if (m_work_queue.empty()) {
+      LOGDBG("*** queue empty");
+      return nullptr;
+    }
+    else {
+      const T& _t = m_work_queue.top(); // non blocking
+      LOGDBG("*** _t: " << &_t);
+      return &_t;
+    }
   }
 
 protected:

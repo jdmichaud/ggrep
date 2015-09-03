@@ -35,6 +35,7 @@ all: $(OBJS)
 #
 dbg: CFLAGS += -DDEBUG -ggdb3 -DS_LOGINF -DS_LOGDBG
 dbg: DBGLIBS= -lcppunit -lefence -lSegFault
+#-lprofiler
 dbg: OPTFLGS=
 dbg: all
 #

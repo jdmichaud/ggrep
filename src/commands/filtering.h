@@ -25,4 +25,40 @@ private:
   std::string m_filter;
 };
 
+/*
+ * Set the current buffer in the buffer model to the filtered buffer
+ */
+class EnableFiltering : public Command {
+public:
+  EnableFiltering(Controller &controller, Invoker &invoker, IState *state) :
+    Command(controller, invoker, state) {}
+
+  virtual void execute() {
+    m_controller.enable_filtering_on_current_buffer();
+  }
+  virtual void unexecute() {
+    m_controller.disable_filtering_on_current_buffer();
+  }
+  virtual bool unexecutable() { return true; };
+};
+
+/*
+ * Set the current buffer in the buffer model to the unfiltered buffer (loaded
+ * file)
+ */
+class DisableFiltering : public Command {
+public:
+  DisableFiltering(Controller &controller, Invoker &invoker, IState *state) :
+    Command(controller, invoker, state) {}
+
+  virtual void execute() {
+    m_controller.disable_filtering_on_current_buffer();
+  }
+  virtual void unexecute() {
+    m_controller.enable_filtering_on_current_buffer();
+  }
+  virtual bool unexecutable() { return true; };
+};
+
+
 #endif // __FILTERING_COMMAND_H__

@@ -75,7 +75,21 @@ void Controller::_route_callback(uint event_id) {
       }
   } else {
     // otherwise, inject a REDRAW event
-    (*this).inject(Event(event_id));
+    (*this).inject(Redraw(event_id));
+  }
+}
+
+void Controller::compress_redraw_event() {
+  // Peep the following event
+  Event const *next_e = nullptr;
+  next_e = _event_consumer.peep();
+  // As long as we have REDRAW event
+  int compressed_event = 0;
+  while (next_e != nullptr && isredraw(next_e->get_eventid())) {
+    // pop them
+    _event_consumer.take();
+    next_e = _event_consumer.peep();
+    ++compressed_event;
   }
 }
 
@@ -91,7 +105,10 @@ void Controller::start() {
   {
     // ... consumer event and do something about it
     try {
+      // Take the event to handle
       const Event e = _event_consumer.take();
+      // If the event to handle is a REDRAW event of some kind, try to compress
+      if (isredraw(e.get_eventid())) compress_redraw_event();
       _context.inject(e);
     } catch (UnhandledEvent e) {
       LOGERR("While injecting event into context, UnhandledEvent: " << e.what());
@@ -117,13 +134,13 @@ void Controller::inject_key(int key) {
  LOGDBG("Controller::inject_key called with key: " << key <<
          " (" << std::oct << key << std::dec << ")");
   try {
-    (*this).inject(std::move(_input_factory.build_input(key)));
+    (*this).inject(_event_factory.build_event(key));
   } catch (std::runtime_error e) {
     LOGERR("While creating event, runtime_error: " << e.what());
   }
 }
 
-void Controller::inject(const Event &&e) {
+void Controller::inject(const Event e) {
   try {
     LOGDBG("e.get_eventid(): " << e.get_eventid());
 #ifdef MULTI_THREADED_USER_INPUT
@@ -169,7 +186,7 @@ bool Controller::create_buffer(const std::string &filepath) {
     BufferModel *buffer_model =
       new BufferModel(_buffer_factory.create_buffer(filepath));
     // Attach the controller observer to the newly created buffer
-    buffer_model->register_observer(std::bind( &Controller::route_callback, 
+    buffer_model->register_observer(std::bind( &Controller::route_callback,
                                                this, REDRAW_BUFFER, _1 ));
     // Add the buffer model to the browser model
     _browser_model.emplace_buffer(
@@ -243,9 +260,9 @@ void Controller::set_view_size(uint nlines, uint ncolumns) {
 void Controller::scroll_buffer_up(uint shift) {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   if (buffer->get_first_line_displayed() >= shift)
-    buffer->set_first_line_displayed().update() -= shift;
+    buffer->set_first_line_displayed(buffer->get_first_line_displayed() - shift);
   else
-    buffer->set_first_line_displayed().update() = 0;
+    buffer->set_first_line_displayed(0);
 }
 
 void Controller::scroll_buffer_down(uint shift) {
@@ -255,10 +272,10 @@ void Controller::scroll_buffer_down(uint shift) {
       buffer->get_first_line_displayed() + shift >
         (buffer->get_number_of_line() - (_browser_model.get_view_line_number() - 2)))
   {
-    buffer->set_first_line_displayed().update() =
-      buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2;
+    buffer->set_first_line_displayed(
+      buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2);
   } else {
-    buffer->set_first_line_displayed().update() += shift;
+    buffer->set_first_line_displayed(buffer->get_first_line_displayed() + shift);
   }
 }
 
@@ -272,8 +289,8 @@ void Controller::scroll_buffer_page_down() {
 
 void Controller::scroll_buffer_end() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
-  buffer->set_first_line_displayed().update() =
-    buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2;
+  buffer->set_first_line_displayed(
+    buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2);
 }
 
 /*
@@ -288,6 +305,8 @@ void Controller::add_filter(const std::string &filter) {
   LOGDBG("buffer->get_filter_set().filters.size(): " << buffer->get_filter_set().filters.size());
   // Signal the filtering processor
   buffer->m_filter.signal();
+  // Switch to filtered buffer
+  buffer->enable_filtering();
 }
 
 void Controller::reinit_current_buffer() {
@@ -295,4 +314,14 @@ void Controller::reinit_current_buffer() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   // Clear the filter set
   buffer->set_filter_set().update().filters.clear();
+}
+
+void Controller::enable_filtering_on_current_buffer() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->enable_filtering();
+}
+
+void Controller::disable_filtering_on_current_buffer() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->disable_filtering();
 }

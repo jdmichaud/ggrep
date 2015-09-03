@@ -27,6 +27,7 @@
 #include "buffer_factory.h"
 #include "context.h"
 #include "input.h"
+#include "event_factory.h"
 
 
 class Controller
@@ -45,7 +46,7 @@ public:
   /**
    * Inject an event through this api.
    */
-  void inject(const Event &&);
+  void inject(const Event);
   /** Bind a view to the controller. The controller is supposed to interact only
     * with models and not the view. But this priviledged access to the view is
     * restricted to special interaction like requesting an input (prompt).
@@ -59,7 +60,7 @@ public:
     */
   void _route_callback(uint event_id);
   /**
-    * Proxu signature so we ignore the observable parameters which comes 
+    * Proxu signature so we ignore the observable parameters which comes
     * with the callback type used in our observer pattern
     */
   void route_callback(uint event_id, IObservable &observable);
@@ -127,10 +128,22 @@ public:
     * have made while filtering
     */
   void reinit_current_buffer();
+  /**
+    * Show the filtered buffer
+    */
+  void enable_filtering_on_current_buffer();
+  /**
+    * Show the unfiltered buffer (i.e. loaded file)
+    */
+  void disable_filtering_on_current_buffer();
 
 private:
   /* Start the view engine */
   void view_start();
+  /** This is an optimization. To reduce the amount of redrawing we do, if
+    * several REDRAW events are queued consecutively, we pop them all
+    * and redraw just once */
+  void compress_redraw_event();
 
 private:
   // List of binded views
@@ -146,7 +159,7 @@ private:
   // The state machine
   Context             _context;
   // Factory generating inputs from keys
-  InputFactory        _input_factory;
+  EventFactory        _event_factory;
   // Event work queue
   WorkQueue<Event>    _event_queue;
   // Producer for user inputs

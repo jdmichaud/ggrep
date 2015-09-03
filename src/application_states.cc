@@ -120,7 +120,7 @@ void FilterState::enter(const IEvent &e) {
 
 void FilterState::exit(const IEvent &e) {
   LOGDBG("exiting FilterState");
-  m_controller.reinit_current_buffer();
+  m_invoker.create_and_execute<DisableFiltering>();
 }
 
 AddFilterState::AddFilterState(Context &context, Controller &controller,

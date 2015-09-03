@@ -31,9 +31,18 @@ public:
   virtual void add(const T t) = 0;
 
   /*!
+   * Get the element at the top of the queue without poping it.
+   * \param blocking If true and queue empty, the call will block until a
+   * Producer add a T. blocking is false if not specified.
+   * Returns a constant reference to the element at the top.
+   */
+  virtual const T& top(bool blocking = false) = 0;
+
+  /*!
    * Pop a thing in a thread safe way.
    * \param blocking If true and queue empty, the call will block until a
    * Producer add a T. blocking is false if not specified.
+   * Returns a copy of the element poped. TODO: use move semantics.
    */
   virtual T pop(bool blocking = false) = 0;
 
@@ -67,10 +76,23 @@ public:
 
   virtual void add(const T t)
   {
-    LOGDBG("add: " << &t);
     std::lock_guard<std::mutex> guard(m_mutex);
     m_queue.emplace_back(t);
     m_condv.notify_all();
+  }
+
+  virtual const T& top(bool blocking = false) {
+    std::unique_lock<std::mutex> lock(m_mutex);
+    while (m_queue.empty())
+    {
+      if (blocking)
+        m_condv.wait(lock);
+      else
+        // Proper crash to avoid a seg fault
+        throw std::runtime_error("pop on empty queue");
+    }
+    const T& value = m_queue.front();
+    return value;
   }
 
   virtual T pop(bool blocking = false)
@@ -86,7 +108,6 @@ public:
     }
     T value = m_queue.front();
     m_queue.pop_front();
-    LOGDBG("pop: " << &value);
     return value;
   }
 

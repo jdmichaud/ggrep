@@ -100,28 +100,13 @@ void TerminalView::redraw_all() {
 void TerminalView::redraw_buffer(BufferModel &buffer_model) {
   LOGDBG("TerminalView::redraw_buffer called");
   if (_state_model.get_state() == state_e::OPEN_STATE
-      || _state_model.get_state() == state_e::BROWSE_STATE)
+      || _state_model.get_state() == state_e::BROWSE_STATE
+      || _state_model.get_state() == state_e::FILTER_STATE)
   {
-    print_buffer(stdscr, buffer_model.get_text(), 
+    print_buffer(stdscr, buffer_model.get_text(),
                  range(buffer_model.get_first_line_displayed(),
                        buffer_model.get_number_of_line()),
                  0, this->_nlines, this->_ncols, 0, false);
-    redraw_prompt(_prompt_model);
-  }
-  if (_state_model.get_state() == state_e::FILTER_STATE) {
-    // If filter state is active
-    if (buffer_model.get_filter_set().filters.empty()) {
-      // But no line filtered, display the full buffer
-      print_buffer(stdscr, buffer_model.get_text(), 
-                   range(buffer_model.get_first_line_displayed(),
-                         buffer_model.get_number_of_line()),
-                   0, this->_nlines, this->_ncols, 0, false);
-    } else {
-      // else display only the filtered lines
-      print_buffer(stdscr, buffer_model.get_text(), 
-                   buffer_model.get_filtered_lines(),
-                   0, this->_nlines, this->_ncols, 0, false);
-    }
     redraw_prompt(_prompt_model);
   }
 }
@@ -167,7 +152,8 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
     // Print the prompt
     wprintw(stdscr, "%s",
             &prompt_model.get_prompt().c_str()[_prompt_string_index]);
-  } else if (_state_model.get_state() == state_e::BROWSE_STATE) {
+  } else if (_state_model.get_state() == state_e::BROWSE_STATE
+             || _state_model.get_state() == state_e::FILTER_STATE) {
     const std::unique_ptr<BufferModel> &buffer =
       (*_browser_model.get_current_buffer());
     // display the number of lines and the current top line (25 because 2^32 is
@@ -176,23 +162,6 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
     wmove(stdscr, this->_nlines - 1, this->_ncols - 25);
     wprintw(stdscr, "%9i/%i",
             buffer->get_first_line_displayed(), buffer->get_number_of_line());
-  } else if (_state_model.get_state() == state_e::FILTER_STATE) {
-    const std::unique_ptr<BufferModel> &buffer =
-      (*_browser_model.get_current_buffer());
-    // display the the current top line, the number of filtered lines and the 
-    // total number of lines and  (32 because 2^32 is the maximum number of 
-    // lines we can load so we can at display at most
-    // 4294967296/4294967296/4294967296)
-    wmove(stdscr, this->_nlines - 1, this->_ncols - 32);
-    wprintw(stdscr, "%9i/%i/%i",
-            buffer->get_first_line_displayed(),
-            buffer->get_filtered_lines().size(),
-            buffer->get_number_of_line());
-  }
-  if (_state_model.get_state() == state_e::BROWSE_STATE ||
-      _state_model.get_state() == state_e::FILTER_STATE) {    
-    const std::unique_ptr<BufferModel> &buffer =
-      (*_browser_model.get_current_buffer());
     // If at the top of the file, display a Top tag
     if (buffer->get_first_line_displayed() == 0) {
       wmove(stdscr, this->_nlines - 1, this->_ncols - 3);
@@ -245,7 +214,7 @@ void TerminalView::prompt(Controller &controller) {
   int key = 0;
   while ((key = getch()) == ERR)
     if (controller.is_interrupted()) return ;
-  controller.inject(key);
+  controller.inject_key(key);
 }
 
 void TerminalView::get_view_size(uint &nlines, uint ncols) {

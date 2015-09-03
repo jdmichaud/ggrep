@@ -30,7 +30,7 @@ class BufferFactory : public IBufferFactory {
   std::unique_ptr<IBuffer> create_buffer(const std::string &filepath) {
     LOGDBG("Create buffer with filepath: " << filepath);
 //    return std::make_unique<IBuffer>(filepath);
-    return std::unique_ptr<IBuffer>(new Buffer(filepath));
+    return std::unique_ptr<IBuffer>(new FileBuffer(filepath));
   }
 };
 

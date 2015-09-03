@@ -15,6 +15,7 @@
 #include <condition_variable>
 
 #include "logmacros.h"
+#include "buffer.h"
 
 /**
  * A processor is a class representing a thread executing a task in the
@@ -85,6 +86,34 @@ private:
 class BufferModel;
 struct filter_set_t;
 
+/*
+ * This class implements a buffer containing the result of the FilterEngine. It
+ * implements the standard IBuffer interface but does not hold a copy of the
+ * lines filtered, only pointers to the original IBuffer.
+ */
+class FilteredBuffer : public Buffer {
+public:
+  FilteredBuffer(std::shared_ptr<IBuffer> &buffer);
+  ~FilteredBuffer();
+  /*
+   * Standard IBuffer APIs
+   */
+  bool is_binary() { return false; }
+  char **get_text() const;
+  uint get_number_of_line() const;
+  uint get_original_number_of_line() const;
+  void set_number_of_line(uint) { /* Not applicable */ }
+  /*
+   * Specific FilteredBuffer APIs
+   */
+  void clear();
+  void add_line(char *line);
+private:
+  uint number_of_filtered_line;
+  char **m_filtered_lines;
+  uint m_original_number_of_line;
+};
+
 class FilterEngine : public ProcessorThread {
 public:
   FilterEngine(BufferModel &buffer_model);
@@ -94,11 +123,6 @@ public:
    * signal.
    */
   void filter();
-  /*
-   * As long as there is no filter or no text to filter, we wait. Unless we are
-   * interrupted.
-   */
-  void wait_for_something_to_filter(char * const *current_file_line);
 private:
   /*
    * Match a character string from the buffer with a particular filter set.
