@@ -192,13 +192,18 @@ protected:
     // get file data
     pbuf->sgetn(buffer, read_size);
     // Get the answer
-    bool is_bin = (*this).is_data_binary(buffer, test_len);
+    bool is_bin = (*this).is_data_binary(buffer, read_size);
     delete[] buffer;
     return is_bin;
   }
 
   bool is_data_binary(const void *data, size_t len) {
-    return memchr(data, '\0', len) != NULL;
+    const char *pc = (const char *) memchr(data, '\0', len);
+    if (pc != NULL) {
+      LOGERR("found character \\0 at "
+             << (unsigned long) (pc - (const char *) data));
+    }
+    return (pc != NULL);
   }
 
   /*
