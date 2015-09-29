@@ -268,10 +268,11 @@ void Controller::scroll_buffer_up(uint shift) {
 void Controller::scroll_buffer_down(uint shift) {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   // TODO: Get rid of constant. Prompt and header might take more than 1 line each!
-  if ((_browser_model.get_view_line_number() - 2) > buffer->get_number_of_line() ||
-      buffer->get_first_line_displayed() + shift >
-        (buffer->get_number_of_line() - (_browser_model.get_view_line_number() - 2)))
-  {
+  if ((_browser_model.get_view_line_number() - 2) > buffer->get_number_of_line()) {
+    // Do nothing
+  }
+  else if (buffer->get_first_line_displayed() + shift >
+           (buffer->get_number_of_line() - (_browser_model.get_view_line_number() - 2))) {
     buffer->set_first_line_displayed(
       buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2);
   } else {
