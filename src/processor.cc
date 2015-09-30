@@ -57,6 +57,7 @@ void FilterEngine::filter() {
       if (m_signaled) {
         (*this).reset_signal(); // reset it to false
         // Clear the model buffer
+        LOGDBG("clear filtered lined");
         m_buffer_model.clear_filtered_line();
         // Position the current character string to be added
         current_buffer_line = 0;
@@ -67,6 +68,7 @@ void FilterEngine::filter() {
     // Does the current line match the filter set
     if (match(file_text[current_buffer_line], m_buffer_model.get_filter_set())) {
       // Yes, add it to the model
+      LOGDBG("line " << current_buffer_line << " matches");
       m_buffer_model.add_filtered_line(file_text[current_buffer_line]);
     }
     // Look at the next line

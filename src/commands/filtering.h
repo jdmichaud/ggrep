@@ -60,5 +60,19 @@ public:
   virtual bool unexecutable() { return true; };
 };
 
+/*
+ * Reset the filtering.
+ */
+class ResetFiltering : public Command {
+public:
+  ResetFiltering(Controller &controller, Invoker &invoker, IState *state) :
+    Command(controller, invoker, state) {}
+
+  virtual void execute() {
+    m_controller.clear_filtering_on_current_buffer();
+  }
+  virtual void unexecute() { /* non undoable */ }
+  virtual bool unexecutable() { return false; };
+};
 
 #endif // __FILTERING_COMMAND_H__

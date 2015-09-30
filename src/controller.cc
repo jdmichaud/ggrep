@@ -310,13 +310,6 @@ void Controller::add_filter(const std::string &filter) {
   buffer->enable_filtering();
 }
 
-void Controller::reinit_current_buffer() {
-  LOGDBG("reinit current buffer");
-  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
-  // Clear the filter set
-  buffer->set_filter_set().update().filters.clear();
-}
-
 void Controller::enable_filtering_on_current_buffer() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   buffer->enable_filtering();
@@ -325,4 +318,11 @@ void Controller::enable_filtering_on_current_buffer() {
 void Controller::disable_filtering_on_current_buffer() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   buffer->disable_filtering();
+}
+
+void Controller::clear_filtering_on_current_buffer() {
+  LOGDBG("reinit current buffer");
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  // Clear the filter set
+  buffer->set_filter_set().update().filters.clear();
 }

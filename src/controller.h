@@ -124,10 +124,6 @@ public:
   /* Filter APIs */
   /** Add a new filter into the filter_set and signal the filter thread */
   void add_filter(const std::string &filter);
-  /** Reset the buffer with the file content, discarding modification we might
-    * have made while filtering
-    */
-  void reinit_current_buffer();
   /**
     * Show the filtered buffer
     */
@@ -136,6 +132,10 @@ public:
     * Show the unfiltered buffer (i.e. loaded file)
     */
   void disable_filtering_on_current_buffer();
+  /**
+    * Clear the filtered lines of the buffer
+    */
+  void clear_filtering_on_current_buffer();
 
 private:
   /* Start the view engine */

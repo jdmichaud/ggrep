@@ -109,7 +109,8 @@ FilterState::FilterState(Context &context, Controller &controller,
                          IState *parent_state) :
   State(context, controller, parent_state,
     {
-      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>(); } }
+      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<ResetFiltering>();
+                                                          m_invoker.create_and_execute<BacktrackCommand>(); } }
     }, state_e::FILTER_STATE)
 { }
 

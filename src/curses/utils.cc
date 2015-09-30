@@ -22,8 +22,8 @@ uint print_line(WINDOW *w, const char *data, size_t max_char, uint xoffset) {
 }
 
 template <typename range_type>
-void print_buffer(WINDOW *w, char * const *buffer, const range_type& r, 
-                  uint first_column, uint lines, uint columns, 
+void print_buffer(WINDOW *w, char * const *buffer, const range_type& r,
+                  uint first_column, uint lines, uint columns,
                   uint xoffset, bool wordwrap) {
   LOGFN();
   // We will print nlines - prompt - fbar
@@ -62,18 +62,19 @@ void print_buffer(WINDOW *w, char * const *buffer, const range_type& r,
   // Clear the rest of the lines
   int x, y;
   getyx(stdscr, y, x);
-  while (nb_line--) {
+  while (nb_line) {
     // TODO: don't assume one line header
-    wmove(stdscr, lines - 1 - nb_line, x + xoffset);
+    wmove(stdscr, lines - 1 - nb_line, xoffset);
     wclrtoeol(stdscr);
+    nb_line--;
   }
 }
 
 template void print_buffer< std::list<uint> >
-                  (WINDOW *w, char * const *buffer, const std::list<uint>& r, 
-                  uint first_column, uint lines, uint columns, 
+                  (WINDOW *w, char * const *buffer, const std::list<uint>& r,
+                  uint first_column, uint lines, uint columns,
                   uint xoffset, bool wordwrap);
 template void print_buffer< range >
-                  (WINDOW *w, char * const *buffer, const range& r, 
-                  uint first_column, uint lines, uint columns, 
+                  (WINDOW *w, char * const *buffer, const range& r,
+                  uint first_column, uint lines, uint columns,
                   uint xoffset, bool wordwrap);
