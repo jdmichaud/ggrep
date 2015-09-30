@@ -75,4 +75,18 @@ public:
   virtual bool unexecutable() { return false; };
 };
 
+class SwitchFilterType : public Command {
+public:
+  SwitchFilterType(Controller &controller, Invoker &invoker, IState *state) :
+    Command(controller, invoker, state) {}
+
+  virtual void execute() {
+    m_controller.switch_filter_type();
+  }
+  virtual void unexecute() {
+    m_controller.switch_filter_type();
+  }
+  virtual bool unexecutable() { return true; };
+};
+
 #endif // __FILTERING_COMMAND_H__

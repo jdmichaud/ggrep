@@ -174,6 +174,18 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
       wprintw(stdscr, "End");
     }
   }
+  // While in filter state, show the type of filter (OR / AND)
+  if (_state_model.get_state() == state_e::FILTER_STATE) {
+    const std::unique_ptr<BufferModel> &buffer =
+      (*_browser_model.get_current_buffer());
+    wmove(stdscr, this->_nlines - 1, this->_ncols - 30);
+    if (buffer->get_filter_set().land) {
+      wprintw(stdscr, "AND");
+    } else {
+      wprintw(stdscr, "OR");
+    }
+  }
+
   // The cursor is actually moved only if we are in a state when the prompt is
   // focused
   redraw_cursor(_state_model);

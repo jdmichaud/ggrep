@@ -136,6 +136,10 @@ public:
     * Clear the filtered lines of the buffer
     */
   void clear_filtering_on_current_buffer();
+  /**
+    * Switch between AND/OR filter
+    */
+  void switch_filter_type();
 
 private:
   /* Start the view engine */

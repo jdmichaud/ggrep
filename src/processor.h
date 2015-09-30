@@ -59,7 +59,7 @@ public:
     }
   }
   void stop() { m_interrupted = true; signal(); }
-  void signal() { LOGDBG("signled"); m_signal.notify_all(); m_signaled = true; }
+  void signal() { LOGDBG("signled"); m_signaled = true; m_signal.notify_all(); }
   inline void reset_signal() { m_signaled = false; }
   /*
    * There can be two states in which we are signaled:

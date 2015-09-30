@@ -326,3 +326,10 @@ void Controller::clear_filtering_on_current_buffer() {
   // Clear the filter set
   buffer->set_filter_set().update().filters.clear();
 }
+
+void Controller::switch_filter_type() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->set_filter_set().update().land = !buffer->get_filter_set().land;
+  // Signal the filtering processor
+  buffer->m_filter.signal();
+}

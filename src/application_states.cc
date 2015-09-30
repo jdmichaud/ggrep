@@ -93,6 +93,7 @@ BrowseState::BrowseState(Context &context, Controller &controller,
                          IState *parent_state) :
   State(context, controller, parent_state,
     {
+      // Ctrl+F = KEY_ACK
       { new Ctrl(KEY_ACK),    [this](const IEvent& b) { m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::FILTER_STATE, b); } },
       { new Arrow(KEY_DOWN),  [this](const IEvent& b) { m_invoker.create_and_execute<DownCommand>(); } },
       { new Arrow(KEY_UP),    [this](const IEvent& b) { m_invoker.create_and_execute<UpCommand>(); } },
@@ -109,8 +110,10 @@ FilterState::FilterState(Context &context, Controller &controller,
                          IState *parent_state) :
   State(context, controller, parent_state,
     {
-      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<ResetFiltering>();
-                                                          m_invoker.create_and_execute<BacktrackCommand>(); } }
+      { new Ctrl(KEY_ESC),    [this](const IEvent& b) { m_invoker.create_and_execute<ResetFiltering>();
+                                                        m_invoker.create_and_execute<BacktrackCommand>(); } },
+      // Ctrl + O = KEY_SIN
+      { new Ctrl(KEY_SIN),    [this](const IEvent& b) { m_invoker.create_and_execute<SwitchFilterType>(); } },
     }, state_e::FILTER_STATE)
 { }
 
