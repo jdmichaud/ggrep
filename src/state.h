@@ -125,7 +125,8 @@ public:
   virtual bool handle(const IEvent &event) {
     for (auto action: m_action_map) {
       LOGDBG("action.first: " << typeid(*action.first).name() << " " <<
-             "get_eventid: " << action.first->get_eventid());
+             "get_eventid: " << action.first->get_eventid() << " " <<
+             "state: " << *this);
       if (action.first->is_equal(event)) {
         LOGDBG("Found the event in the map");
         action.second(event);

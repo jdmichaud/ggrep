@@ -71,5 +71,21 @@ public:
 private:
 };
 
+/*
+ * Inject an event into the controller
+ */
+class InjectCommand : public Command {
+public:
+  InjectCommand(Controller &controller, Invoker &invoker, IState *state,
+                const Event &event) :
+    Command(controller, invoker, state), m_event(event) {}
+  virtual void execute() {
+    m_controller.inject(m_event);
+  }
+  virtual void unexecute() { /* non unexecutable */ }
+  virtual bool unexecutable() { return false; };
+private:
+  const Event &m_event;
+};
 
 #endif // __STATE_CMD_H__
