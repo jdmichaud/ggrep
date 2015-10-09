@@ -141,6 +141,8 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
   /*
    * Print a state prompt
    */
+  const std::unique_ptr<BufferModel> &buffer =
+    (*_browser_model.get_current_buffer());
   if (_state_model.get_state() == state_e::CLOSE_STATE
       || _state_model.get_state() == state_e::ADD_FILTER_STATE
       || _state_model.get_state() == state_e::ERROR_STATE) {
@@ -155,8 +157,6 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
             &prompt_model.get_prompt().c_str()[_prompt_string_index]);
   } else if (_state_model.get_state() == state_e::BROWSE_STATE
              || _state_model.get_state() == state_e::FILTER_STATE) {
-    const std::unique_ptr<BufferModel> &buffer =
-      (*_browser_model.get_current_buffer());
     // display the number of lines and the current top line (25 because 2^32 is
     // the maximum number of lines we can load so we can at display at most
     // 4294967296/4294967296)
@@ -176,20 +176,18 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
     }
   }
   if (_state_model.get_state() == state_e::FILTER_STATE) {
+    // Show filtering progress if not 100%
+    if (buffer->get_filter_processing_progress() != 100) {
+      wmove(stdscr, this->_nlines - 1, this->_ncols - 35);
+      wprintw(stdscr,
+              (std::to_string(buffer->get_filter_processing_progress()) + " %%").c_str());
+    }
     // While in filter state, show the type of filter (OR / AND)
-    const std::unique_ptr<BufferModel> &buffer =
-      (*_browser_model.get_current_buffer());
-    wmove(stdscr, this->_nlines - 1, this->_ncols - 30);
+    wmove(stdscr, this->_nlines - 1, this->_ncols - 40);
     if (buffer->get_filter_set().land) {
       wprintw(stdscr, "AND");
     } else {
       wprintw(stdscr, "OR");
-    }
-    // Show filtering progress if not 100%
-    if (buffer->get_filter_processing_progress() != 100) {
-      wmove(stdscr, this->_nlines - 1, this->_ncols - 25);
-      wprintw(stdscr,
-              (std::to_string(buffer->get_filter_processing_progress()) + " %").c_str());
     }
   }
 
