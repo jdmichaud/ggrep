@@ -66,10 +66,8 @@ inline bool operator!=(const IEvent &lhs, const IEvent &rhs) {
 class Event : public IEvent {
 public:
   Event(uint eventid) : m_eventid(eventid), m_data(nullptr) {
-    LOGDBG("Event::Event(uint): m_eventid == " << m_eventid);
   }
   Event(const Event &e) : m_eventid(e.m_eventid), m_data(e.m_data) {
-    LOGDBG("Event::Event(const Event &): m_eventid == " << m_eventid);
   }
   virtual ~Event() {}
   /*! Get the stored keycode */

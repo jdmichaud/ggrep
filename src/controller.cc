@@ -298,16 +298,21 @@ void Controller::scroll_buffer_end() {
  * Filtering APIs
  */
 void Controller::add_filter(const std::string &filter) {
-  LOGDBG("add a new filter: " << filter);
-  // Add the new regex to the set of filters of the current buffer
-  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
-  buffer->set_filter_set().update().filters.emplace_back(
-    std::move(std::make_pair(filter, std::regex(filter))));
-  LOGDBG("buffer->get_filter_set().filters.size(): " << buffer->get_filter_set().filters.size());
-  // Signal the filtering processor
-  buffer->m_filter.signal();
-  // Switch to filtered buffer
-  buffer->enable_filtering();
+  const std::unique_ptr<BufferModel> &buffer =
+    (*_browser_model.get_current_buffer());
+  buffer->add_filter(filter);
+}
+
+void Controller::update_last_filter(const std::string &filter) {
+  const std::unique_ptr<BufferModel> &buffer =
+    (*_browser_model.get_current_buffer());
+  buffer->update_last_filter(filter);
+}
+
+void Controller::remove_last_filter() {
+  const std::unique_ptr<BufferModel> &buffer =
+    (*_browser_model.get_current_buffer());
+  buffer->remove_last_filter();
 }
 
 void Controller::enable_filtering_on_current_buffer() {
@@ -321,7 +326,6 @@ void Controller::disable_filtering_on_current_buffer() {
 }
 
 void Controller::clear_filtering_on_current_buffer() {
-  LOGDBG("reinit current buffer");
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   // Clear the filter set
   buffer->set_filter_set().update().filters.clear();
@@ -332,4 +336,14 @@ void Controller::switch_filter_type() {
   buffer->set_filter_set().update().land = !buffer->get_filter_set().land;
   // Signal the filtering processor
   buffer->m_filter.signal();
+}
+
+void Controller::set_filter_dynamic() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->set_filter_set().update().dynamic = true;
+}
+
+void Controller::unset_filter_dynamic() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->set_filter_set().update().dynamic = false;
 }

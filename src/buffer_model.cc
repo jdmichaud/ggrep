@@ -11,8 +11,8 @@ BufferModel::BufferModel(std::shared_ptr<IBuffer> &&buffer) :
   LOGDBG("BufferModel creator " << this);
   // Set the current buffer as the file buffer
   set_current_buffer(std::dynamic_pointer_cast<IBuffer>(m_file_buffer));
-  // By default, we will AND the filtering matches
-  m_filter_set.land = true;
+  // By default, we will OR the filtering matches
+  m_filter_set.land = false;
   // Before starting the filter thread, initialize the FilteredBuffer which will
   // be zeroed by the thread. This is not optimal as we will allocate memory
   // that we won't be using now if ever.
@@ -86,3 +86,39 @@ void BufferModel::disable_filtering() {
 std::shared_ptr<FileBuffer> BufferModel::get_file_buffer() {
   return m_file_buffer;
 }
+
+void BufferModel::retrieve_filter_set(filter_set_t &filter_set) {
+  std::lock_guard<std::mutex> lock(m_filter_set_mutex);
+  filter_set = m_filter_set;
+}
+
+void BufferModel::add_filter(const std::string &filter) {
+  std::lock_guard<std::mutex> lock(m_filter_set_mutex);
+  // Add the new regex to the set of filters of the current buffer
+  set_filter_set().update().filters.emplace_back(
+    std::move(std::make_pair(filter, std::regex(filter))));
+  // Signal the filtering processor
+  m_filter.signal();
+}
+
+void BufferModel::update_last_filter(const std::string &filter) {
+  std::lock_guard<std::mutex> lock(m_filter_set_mutex);
+  {
+    Update<filter_set_t> update = set_filter_set();
+    // Remove the current filter...
+    update.update().filters.pop_back();
+    // ... and replace it with the new value.
+    update.update().filters.emplace_back(
+      std::move(std::make_pair(filter, std::regex(filter))));
+  }
+  // Signal the filtering processor
+  m_filter.signal();
+}
+
+void BufferModel::remove_last_filter() {
+  std::lock_guard<std::mutex> lock(m_filter_set_mutex);
+  set_filter_set().update().filters.pop_back();
+  // Signal the filtering processor
+  m_filter.signal();
+}
+

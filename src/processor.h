@@ -16,6 +16,7 @@
 
 #include "logmacros.h"
 #include "buffer.h"
+#include "filter_set.h"
 
 /**
  * A processor is a class representing a thread executing a task in the
@@ -59,7 +60,7 @@ public:
     }
   }
   void stop() { m_interrupted = true; signal(); }
-  void signal() { LOGDBG("signled"); m_signaled = true; m_signal.notify_all(); }
+  void signal() { LOGDBG("signaled"); m_signaled = true; m_signal.notify_all(); }
   inline void reset_signal() { m_signaled = false; }
   /*
    * There can be two states in which we are signaled:
@@ -84,7 +85,6 @@ private:
 
 // Forward declaration
 class BufferModel;
-struct filter_set_t;
 
 /*
  * This class implements a buffer containing the result of the FilterEngine. It
@@ -106,7 +106,9 @@ public:
   /*
    * Specific FilteredBuffer APIs
    */
+  /** Clear the filtered line buffer */
   void clear();
+  /** Add a line to the filtered line buffer */
   void add_line(char *line);
 private:
   uint number_of_filtered_line;
@@ -123,6 +125,11 @@ public:
    * signal.
    */
   void filter();
+  /*
+   * Re-arm the filter state so that the buffer of filtered line is clear, and a
+   * new filtering can begin
+   */
+  void rearm(uint &current_buffer_line);
 private:
   /*
    * Match a character string from the buffer with a particular filter set.
@@ -132,6 +139,9 @@ private:
 private:
   //Controller  &m_controller;
   BufferModel &m_buffer_model;
+  // We maintain a local filter list in order to avoid taking a mutex for each
+  // line analyzed.
+  filter_set_t m_filter_set;
 };
 
 #endif // __PROCESSOR_H__

@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "context.h"
 #include "application_states.h"
 #include "input.h"
@@ -7,9 +8,6 @@
 #include "commands/misc.h"
 #include "commands/state_cmd.h"
 #include "commands/filtering.h"
-
-#define CLOSE_STATE_PROMPT "filename: "
-#define ADD_FILTER_STATE_PROMPT "add filter: "
 
 DefaultState::DefaultState(Context &context, Controller &controller,
                            IState *parent_state) :
@@ -38,7 +36,9 @@ CloseState::CloseState(Context &context, Controller &controller,
       { new Arrow(C_KEY_RIGHT), [this](const IEvent& b) { m_invoker.create_and_execute<RightWordCommand>(this); } },
       { new Nav(KEY_HOME),      [this](const IEvent& b) { m_invoker.create_and_execute<BegLineCommand>(this); } },
       { new Nav(KEY_END),       [this](const IEvent& b) { m_invoker.create_and_execute<EndLineCommand>(this); } },
-      { new Event(FILE_OPENED), [this](const IEvent& b) { m_invoker.create_and_execute<ChangeStateCommand, state_e, const IEvent &>(state_e::OPEN_STATE, b); } },
+      { new Event(FILE_OPENED), [this](const IEvent& b) { m_invoker.create_and_execute<ChangeStateCommand,
+                                                                                       state_e,
+                                                                                       const IEvent &>(state_e::OPEN_STATE, b); } },
       { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this); } }
     }, state_e::CLOSE_STATE)
 { }
@@ -128,14 +128,17 @@ void FilterState::enter(const IEvent &e) {
 void FilterState::exit(const IEvent &e) {
   LOGDBG("exiting FilterState");
   m_invoker.create_and_execute<DisableFiltering>();
+  m_controller.clear_filtering_on_current_buffer();
 }
 
 AddFilterState::AddFilterState(Context &context, Controller &controller,
                          IState *parent_state) :
   State(context, controller, parent_state,
     {
-      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>(); } },
-      { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<AddFilterCommand>(m_text); } },
+      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>();
+                                                          m_invoker.create_and_execute<CancelCurrentFilterEntry>(); } },
+      { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<EnterCurrentFilterEntry>();
+                                                          m_invoker.create_and_execute<BacktrackCommand>(); } },
       { new Ctrl(KEY_BACKSPACE),[this](const IEvent& b) { m_invoker.create_and_execute<BackspaceCommand>(this); } },
       { new Ctrl(KEY_DC),       [this](const IEvent& b) { m_invoker.create_and_execute<DeleteCommand>(this); } },
       { new Arrow(KEY_LEFT),    [this](const IEvent& b) { m_invoker.create_and_execute<LeftCommand>(this); } },
@@ -144,7 +147,10 @@ AddFilterState::AddFilterState(Context &context, Controller &controller,
       { new Arrow(C_KEY_RIGHT), [this](const IEvent& b) { m_invoker.create_and_execute<RightWordCommand>(this); } },
       { new Nav(KEY_HOME),      [this](const IEvent& b) { m_invoker.create_and_execute<BegLineCommand>(this); } },
       { new Nav(KEY_END),       [this](const IEvent& b) { m_invoker.create_and_execute<EndLineCommand>(this); } },
-      { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this); } }
+      { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this);
+                                                          m_invoker.create_and_execute<UpdateCurrentFilterEntry, 
+                                                                                       const std::string &, 
+                                                                                       const IEvent &>(m_text, b); } }
     }, state_e::FILTER_STATE)
 { }
 
@@ -154,6 +160,8 @@ void AddFilterState::enter(const IEvent &e) {
   (*this).clear();
   // Update the model
   update();
+  // Create the current filter entry in the filter set of the FilteringProcessor
+  m_invoker.create_and_execute<CreateCurrentFilterEntry>();
 }
 
 void AddFilterState::resume(const IEvent &e) {

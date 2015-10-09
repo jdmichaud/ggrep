@@ -101,7 +101,8 @@ void TerminalView::redraw_buffer(BufferModel &buffer_model) {
   LOGDBG("TerminalView::redraw_buffer called");
   if (_state_model.get_state() == state_e::OPEN_STATE
       || _state_model.get_state() == state_e::BROWSE_STATE
-      || _state_model.get_state() == state_e::FILTER_STATE)
+      || _state_model.get_state() == state_e::FILTER_STATE
+      || _state_model.get_state() == state_e::ADD_FILTER_STATE)
   {
     print_buffer(stdscr, buffer_model.get_text(),
                  range(buffer_model.get_first_line_displayed(),
@@ -174,8 +175,8 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
       wprintw(stdscr, "End");
     }
   }
-  // While in filter state, show the type of filter (OR / AND)
   if (_state_model.get_state() == state_e::FILTER_STATE) {
+    // While in filter state, show the type of filter (OR / AND)
     const std::unique_ptr<BufferModel> &buffer =
       (*_browser_model.get_current_buffer());
     wmove(stdscr, this->_nlines - 1, this->_ncols - 30);
@@ -183,6 +184,12 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
       wprintw(stdscr, "AND");
     } else {
       wprintw(stdscr, "OR");
+    }
+    // Show filtering progress if not 100%
+    if (buffer->get_filter_processing_progress() != 100) {
+      wmove(stdscr, this->_nlines - 1, this->_ncols - 25);
+      wprintw(stdscr,
+              (std::to_string(buffer->get_filter_processing_progress()) + " %").c_str());
     }
   }
 

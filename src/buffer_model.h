@@ -15,15 +15,7 @@
 #include "model.h"
 #include "buffer.h"
 #include "processor.h"
-
-/*
- * This structure is the logical representation of the filters set on each
- * buffer
- */
-struct filter_set_t {
-  std::list< std::pair<std::string, std::regex> > filters;
-  bool  land; // logical and if true, logical or otherwise
-};
+#include "filter_set.h"
 
 /*
  * Points to text hold by a Buffer and gives information as to where the model
@@ -36,6 +28,7 @@ public:
   ~BufferModel();
 
   DECLARE_ENTRY( BufferModel, filter_set, filter_set_t );
+  DECLARE_ENTRY( BufferModel, filter_processing_progress, uint );
 public:
   // Set the current visible buffer
   void set_current_buffer(std::shared_ptr<IBuffer>);
@@ -63,10 +56,18 @@ public:
   void enable_filtering();
   void disable_filtering();
   std::shared_ptr<FileBuffer> get_file_buffer();
+  void retrieve_filter_set(filter_set_t &filter_set);
+  /*
+   * Functions used to thread-safely manipulate the filter list
+   */
+  void add_filter(const std::string &filter);
+  void update_last_filter(const std::string &filter);
+  void remove_last_filter();
 private:
   std::shared_ptr<FileBuffer> m_file_buffer;
   std::shared_ptr<FilteredBuffer> m_filtered_buffer;
   std::shared_ptr<IBuffer> m_current_buffer;
+  std::mutex m_filter_set_mutex;
 };
 
 typedef std::list<std::unique_ptr<BufferModel> > buffer_list;

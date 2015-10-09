@@ -11,6 +11,7 @@
 #include <stack>
 #include <exception>
 
+#include "input.h"
 #include "command.h"
 #include "state.h"
 

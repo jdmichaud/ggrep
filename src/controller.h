@@ -125,6 +125,16 @@ public:
   /** Add a new filter into the filter_set and signal the filter thread */
   void add_filter(const std::string &filter);
   /**
+    * Update the last filter added (which is the current edited filter in the
+    * prompt)
+    */
+  void update_last_filter(const std::string &filter);
+  /**
+    * Remove the last filter added (which is the current edited filter in the
+    * prompt)
+    */
+  void remove_last_filter();
+  /**
     * Show the filtered buffer
     */
   void enable_filtering_on_current_buffer();
@@ -140,6 +150,12 @@ public:
     * Switch between AND/OR filter
     */
   void switch_filter_type();
+  /** Indicates the last filter in the list is currently interactively edited */
+  void set_filter_dynamic();
+  /** Indicates the last filter in the list is validated and shall be treated
+    * as a normal filter
+    */
+  void unset_filter_dynamic();
 
 private:
   /* Start the view engine */
