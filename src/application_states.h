@@ -30,13 +30,31 @@ public:
 /*
  * No file opened in this state
  */
-class CloseState : public State<CloseState>, public OneLinerText {
+class CloseState : public State<CloseState> {
 public:
   CloseState(Context &context, Controller &controller, IState *parent_state);
   void enter(const IEvent &);
-  void exit(const IEvent &);
+  void exit(const IEvent &) {
+    LOGDBG("exit CloseState");
+  }
   void suspend(const IEvent &) {
     LOGDBG("suspend CloseState");
+  }
+  void resume(const IEvent &) {
+    LOGDBG("resume CloseState");
+  }
+};
+
+/*
+ * A file is being open
+ */
+class OpeningState : public State<OpeningState>, public OneLinerText {
+public:
+  OpeningState(Context &context, Controller &controller, IState *parent_state);
+  void enter(const IEvent &);
+  void exit(const IEvent &);
+  void suspend(const IEvent &) {
+    LOGDBG("resume OpeningState");
   }
   void resume(const IEvent &);
   virtual void update();

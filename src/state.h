@@ -22,6 +22,7 @@
 enum class state_e {
   DEFAULT_STATE,
   CLOSE_STATE,
+  OPENING_STATE,
   OPEN_STATE,
   BROWSE_STATE,
   ERROR_STATE,

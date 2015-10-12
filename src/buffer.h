@@ -23,16 +23,19 @@
 #define LINE_STATIC_SIZE 256
 
 /*
- * This structure describes the text attributes to apply to a certain contigous
+ * This structure describes the text attributes to apply to a certain contiguous
  * text zone
  */
-typedef struct {
+struct tattr_t {
   int attrs_mask;
   uint start_pos;
   uint end_pos;
-} tattr_t;
 
-typedef std::list<std::list<tattr_t>> attr_list;
+  tattr_t() : attrs_mask(0), start_pos(0), end_pos(0) {}
+  tattr_t(int am, uint sp, uint ep) : attrs_mask(am), start_pos(sp), end_pos(ep) {}
+};
+
+typedef std::map<uint, std::list<tattr_t>> attr_list;
 
 /*
  * Custom exception raised when an error occurs on opening a file
@@ -111,7 +114,7 @@ public:
     m_nb_lines = get_number_of_line();
     // Null terimated string of pointers to char *
     m_buffer = new char*[m_nb_lines + 1];
-    memset(m_buffer, 0, m_nb_lines + 1 * sizeof (char*));
+    memset(m_buffer, 0, (m_nb_lines + 1) * sizeof (char*));
     m_buffer[m_nb_lines] = 0;
     // Load the whole file
     (*this).load({0, -1});
@@ -173,6 +176,11 @@ public:
     static bool is_bin = is_file_binary(m_filepath, 100);
     return is_bin;
   }
+
+  /*
+   * Return the filepath of the FileBuffer
+   */
+  inline const std::string &get_filepath() const { return (*this).m_filepath; }
 
 protected:
   bool is_file_binary(const std::string &filepath, size_t test_len) {

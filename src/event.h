@@ -16,20 +16,21 @@
 
 #define LOWER_BOUND_EVENT   KEY_MAX + 1
 #define FILE_OPENED         LOWER_BOUND_EVENT + 1
-#define FILE_CLOSED         LOWER_BOUND_EVENT + 2
-#define APP_STARTED         LOWER_BOUND_EVENT + 3
-#define ERROR               LOWER_BOUND_EVENT + 4
-#define WARNING             LOWER_BOUND_EVENT + 5
-#define QUESTION            LOWER_BOUND_EVENT + 6
-#define BACKTRACK           LOWER_BOUND_EVENT + 7
-#define UNDO                LOWER_BOUND_EVENT + 8
-#define FILTER_ADDED        LOWER_BOUND_EVENT + 9
-#define REDRAW_ALL          LOWER_BOUND_EVENT + 10
-#define REDRAW_FBAR         LOWER_BOUND_EVENT + 11
-#define REDRAW_PROMPT       LOWER_BOUND_EVENT + 12
-#define REDRAW_BUFFER       LOWER_BOUND_EVENT + 13
-#define REDRAW_BROWSER      LOWER_BOUND_EVENT + 14
-#define REDRAW_STATE        LOWER_BOUND_EVENT + 15
+#define FILE_OPENING        LOWER_BOUND_EVENT + 2
+#define FILE_CLOSED         LOWER_BOUND_EVENT + 3
+#define APP_STARTED         LOWER_BOUND_EVENT + 4
+#define ERROR               LOWER_BOUND_EVENT + 5
+#define WARNING             LOWER_BOUND_EVENT + 6
+#define QUESTION            LOWER_BOUND_EVENT + 7
+#define BACKTRACK           LOWER_BOUND_EVENT + 8
+#define UNDO                LOWER_BOUND_EVENT + 9
+#define FILTER_ADDED        LOWER_BOUND_EVENT + 10
+#define REDRAW_ALL          LOWER_BOUND_EVENT + 11
+#define REDRAW_FBAR         LOWER_BOUND_EVENT + 12
+#define REDRAW_PROMPT       LOWER_BOUND_EVENT + 13
+#define REDRAW_BUFFER       LOWER_BOUND_EVENT + 14
+#define REDRAW_BROWSER      LOWER_BOUND_EVENT + 15
+#define REDRAW_STATE        LOWER_BOUND_EVENT + 16
 
 #ifndef __EVENT_H__
 #define __EVENT_H__

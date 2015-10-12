@@ -182,6 +182,8 @@ void Controller::backtrack(const IEvent &e) {
 
 bool Controller::create_buffer(const std::string &filepath) {
   try {
+    // Generate the FILE_OPENING event into the state machine
+    _context.inject(Event(FILE_OPENING));
     // Create the buffer model
     BufferModel *buffer_model =
       new BufferModel(_buffer_factory.create_buffer(filepath));

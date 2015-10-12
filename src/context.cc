@@ -10,13 +10,16 @@ Context::Context(Controller &controller) {
   m_states.emplace(state_e::DEFAULT_STATE,
                    new DefaultState(*this, controller, nullptr));
   m_states.emplace(state_e::CLOSE_STATE,
-                   new CloseState(*this, controller, 
+                   new CloseState(*this, controller,
                                   m_states[state_e::DEFAULT_STATE]));
+  m_states.emplace(state_e::OPENING_STATE,
+                   new OpeningState(*this, controller,
+                                    m_states[state_e::DEFAULT_STATE]));
   m_states.emplace(state_e::OPEN_STATE,
-                   new OpenState(*this, controller, 
+                   new OpenState(*this, controller,
                                  m_states[state_e::DEFAULT_STATE]));
   m_states.emplace(state_e::ERROR_STATE,
-                   new ErrorState(*this, controller, 
+                   new ErrorState(*this, controller,
                                   m_states[state_e::DEFAULT_STATE]));
   m_states.emplace(state_e::BROWSE_STATE,
                    new BrowseState(*this, controller,

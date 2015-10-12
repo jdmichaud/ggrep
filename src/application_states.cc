@@ -24,6 +24,17 @@ DefaultState::DefaultState(Context &context, Controller &controller,
 
 CloseState::CloseState(Context &context, Controller &controller,
                        IState *parent_state) :
+  State(context, controller, parent_state, {}, state_e::CLOSE_STATE)
+{ }
+
+void CloseState::enter(const IEvent &e) {
+  LOGDBG("entering CloseState");
+  // We never stay in CloseState, but always go in opening state
+  m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::OPENING_STATE, e);
+}
+
+OpeningState::OpeningState(Context &context, Controller &controller,
+                     IState *parent_state) :
   State(context, controller, parent_state,
     {
       { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<ExitCommand>(); } },
@@ -36,29 +47,33 @@ CloseState::CloseState(Context &context, Controller &controller,
       { new Arrow(C_KEY_RIGHT), [this](const IEvent& b) { m_invoker.create_and_execute<RightWordCommand>(this); } },
       { new Nav(KEY_HOME),      [this](const IEvent& b) { m_invoker.create_and_execute<BegLineCommand>(this); } },
       { new Nav(KEY_END),       [this](const IEvent& b) { m_invoker.create_and_execute<EndLineCommand>(this); } },
+      { new Event(FILE_OPENING),[this](const IEvent& b) { m_controller.set_prompt("");
+                                                          pos curpos = m_cur_pos;
+                                                          curpos.x += 0;
+                                                          m_controller.set_prompt_cursor_position(curpos); } },
       { new Event(FILE_OPENED), [this](const IEvent& b) { m_invoker.create_and_execute<ChangeStateCommand,
                                                                                        state_e,
                                                                                        const IEvent &>(state_e::OPEN_STATE, b); } },
       { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this); } }
-    }, state_e::CLOSE_STATE)
-{ }
+    }, state_e::OPENING_STATE)
+{}
 
-void CloseState::enter(const IEvent &e) {
-  LOGDBG("entering CloseState");
+void OpeningState::enter(const IEvent &e) {
+  LOGDBG("entering OpeningState");
   // initialize the text string
   (*this).clear();
   // Update the model
   update();
 }
 
-void CloseState::resume(const IEvent &e) {
-  LOGDBG("resume CloseState");
+void OpeningState::resume(const IEvent &e) {
+  LOGDBG("resume OpeningState");
   // Update the model
   update();
 }
 
-void CloseState::exit(const IEvent &) {
-  LOGDBG("exiting CloseState")
+void OpeningState::exit(const IEvent &) {
+  LOGDBG("exiting OpeningState")
   (*this).clear();
   m_controller.set_prompt("");
   pos curpos = m_cur_pos;
@@ -66,13 +81,12 @@ void CloseState::exit(const IEvent &) {
   m_controller.set_prompt_cursor_position(curpos);
 }
 
-void CloseState::update() {
+void OpeningState::update() {
   m_controller.set_prompt(CLOSE_STATE_PROMPT + m_text);
   pos curpos = m_cur_pos;
   curpos.x += strlen(CLOSE_STATE_PROMPT);
   m_controller.set_prompt_cursor_position(curpos);
 }
-
 
 OpenState::OpenState(Context &context, Controller &controller,
                      IState *parent_state) :
