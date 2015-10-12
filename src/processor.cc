@@ -1,5 +1,9 @@
+#include <ncurses.h>
+#include <map>
 #include <cmath>
 #include <regex>
+#include <tuple>
+#include <utility>
 #include "logmacros.h"
 #include "processor.h"
 #include "buffer_model.h"
@@ -15,9 +19,10 @@ FilterEngine::FilterEngine(BufferModel &buffer_model) :
 /*
  * Match a line of text versus a set of provided filters
  */
-bool FilterEngine::match(const char *line, const filter_set_t &filter_set) {
+bool FilterEngine::match(const char *line,
+                         const filter_set_t &filter_set,
+                         std::cmatch &matches) {
   bool match = false;
-  std::cmatch matches;
   if (filter_set.land) {
     // If we want to AND the results
     for (const auto &re: filter_set.filters) {
@@ -55,6 +60,8 @@ void FilterEngine::filter() {
     m_buffer_model.get_file_buffer()->get_number_of_line();
   // Reset the signal set on the first start
   (*this).reset_signal(); // reset it to false
+  // Will hold the result of the match which will be converted to attributes
+  std::cmatch matches;
   // As long as we are not interrupted
   while (!m_interrupted) {
     // If no filter has been set or we are done with our analysis then we wait.
@@ -75,15 +82,24 @@ void FilterEngine::filter() {
     // Have we been interrupted ?
     if (m_interrupted) return;
     // Does the current line match the filter set
-    if (match(file_text[current_buffer_line], m_filter_set)) {
+    if (match(file_text[current_buffer_line], m_filter_set, matches)) {
       // Yes, add it to the model
       LOGDBG("line " << current_buffer_line << " matches");
       m_buffer_model.add_filtered_line(file_text[current_buffer_line]);
+      // Add the matching information as attributes
+      m_buffer_model.set_attrs().update().emplace(
+        std::make_pair<uint, std::list<tattr_t> >(
+          std::move(current_buffer_line),
+          { tattr_t(A_REVERSE,
+                    matches.position(),
+                    matches.position() + matches.length()) })
+      );
     }
     // Look at the next line
     ++current_buffer_line;
-    // Log the progress for debuggin purposes
-    uint progress = (float) current_buffer_line / (float) number_of_line_in_file * 100;
+    // Compute the progress as percentage of the total number of lines
+    uint progress = (float) current_buffer_line /
+      (float) number_of_line_in_file * 100;
     if (progress % 5 == 0)
       m_buffer_model.set_filter_processing_progress().update() = progress;
   }
@@ -94,13 +110,14 @@ void FilterEngine::rearm(uint &current_buffer_line) {
   // Clear the model buffer
   LOGDBG("clear filtered lined");
   m_buffer_model.clear_filtered_line();
+  // Clear the attributes too
+  m_buffer_model.set_attrs().update().clear();
   // Position the current character string to be added
   current_buffer_line = 0;
   // Retrieve the filter list from the buffer.
   m_buffer_model.retrieve_filter_set(m_filter_set);
   LOGDBG("retrieved filter: " << m_filter_set);
 }
-
 
 FilteredBuffer::FilteredBuffer(std::shared_ptr<IBuffer> &buffer) {
   // Initialize the pointers to the filtered lines

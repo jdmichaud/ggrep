@@ -14,6 +14,7 @@
 #include <functional>
 #include <condition_variable>
 
+#include "types.h"
 #include "logmacros.h"
 #include "buffer.h"
 #include "filter_set.h"
@@ -41,7 +42,7 @@ public:
 
 class ProcessorThread : public Processor {
 public:
-  ProcessorThread(std::function<void()> fn) : m_interrupted(false), 
+  ProcessorThread(std::function<void()> fn) : m_interrupted(false),
     m_function(fn) {}
   void start() {
     LOGDBG("starting thread");
@@ -134,7 +135,8 @@ private:
   /*
    * Match a character string from the buffer with a particular filter set.
    */
-  bool match(const char *line, const filter_set_t &filter_set);
+  bool match(const char *line, const filter_set_t &filter_set,
+             std::cmatch &matches);
 
 private:
   //Controller  &m_controller;
