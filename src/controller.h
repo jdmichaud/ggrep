@@ -2,6 +2,11 @@
  *
  *  The controller gathers the input from the view and update the models
  *  accordingly.
+ *  It works as a simili-reactor. Each view runs in its own thread and act as
+ *  client generating events which are injected into the event loop. Other
+ *  specialized thread can also generate event (like the filtering processir).
+ *  The event are then poped from the event-loop by the main thread and then
+ *  injected in the state machine (context).
  */
 
 #ifndef  __CONTROLLER_H__
@@ -57,10 +62,14 @@ public:
     *    main thread
     * b. an REDRAW event injected in the Controller state machine which will be
     *    handled by the main thread (see a)
+    * This mecanism ensure the view update code is only run in the main thread.
+    * We thus avoid having the view code being thread safe and the
+    * implementation of costly (in terms of dev/maintenance and run time)
+    * synchronization devices.
     */
   void _route_callback(uint event_id);
   /**
-    * Proxu signature so we ignore the observable parameters which comes
+    * Proxy signature so we ignore the observable parameters which comes
     * with the callback type used in our observer pattern
     */
   void route_callback(uint event_id, IObservable &observable);

@@ -1,6 +1,7 @@
 /*
  *
  *  Created by Jean-Daniel Michaud - 05-Mar-2014
+ *  Implementation of a Poducer/Consumer stack as a Monitor
  *
  */
 
@@ -89,7 +90,7 @@ public:
         m_condv.wait(lock);
       else
         // Proper crash to avoid a seg fault
-        throw std::runtime_error("pop on empty queue");
+        throw std::runtime_error("top on empty queue");
     }
     const T& value = m_queue.front();
     return value;

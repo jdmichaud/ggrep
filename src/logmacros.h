@@ -37,6 +37,9 @@
   logfile.close();                                                             \
 }
 
+// Disabled log macro
+#define LOGDBG_(_trace_)
+
 #ifdef S_LOGDBG
 # define LOGDBG(_trace_) LOG_(3, "DBG", _trace_);
 #else

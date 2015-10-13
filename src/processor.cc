@@ -69,9 +69,9 @@ void FilterEngine::filter() {
             current_buffer_line >= number_of_line_in_file)
            && !m_interrupted) // if we are interrupted, we stop waiting
     {
-      LOGDBG("filtering paused");
+      LOGDBG_("filtering paused");
       (*this).wait(); // Wait until someone signals us
-      LOGDBG("filtering started, signal: " << m_signaled);
+      LOGDBG_("filtering started, signal: " << m_signaled);
       // This instruction might seem strange but we need to get out of the loop
       // by resetting the line pointer...
       if (m_signaled) { current_buffer_line = 0; }
@@ -84,7 +84,7 @@ void FilterEngine::filter() {
     // Does the current line match the filter set
     if (match(file_text[current_buffer_line], m_filter_set, matches)) {
       // Yes, add it to the model
-      LOGDBG("line " << current_buffer_line << " matches");
+      LOGDBG_("line " << current_buffer_line << " matches");
       m_buffer_model.add_filtered_line(file_text[current_buffer_line]);
       // Add the matching information as attributes
       m_buffer_model.set_attrs().update().emplace(
@@ -100,7 +100,8 @@ void FilterEngine::filter() {
     // Compute the progress as percentage of the total number of lines
     uint progress = (float) current_buffer_line /
       (float) number_of_line_in_file * 100;
-    if (progress % 5 == 0)
+    if (progress % 5 == 0 &&
+        progress != m_buffer_model.get_filter_processing_progress())
       m_buffer_model.set_filter_processing_progress().update() = progress;
   }
 }
@@ -108,7 +109,7 @@ void FilterEngine::filter() {
 void FilterEngine::rearm(uint &current_buffer_line) {
   (*this).reset_signal(); // reset it to false
   // Clear the model buffer
-  LOGDBG("clear filtered lined");
+  LOGDBG_("clear filtered lined");
   m_buffer_model.clear_filtered_line();
   // Clear the attributes too
   m_buffer_model.set_attrs().update().clear();
@@ -116,7 +117,7 @@ void FilterEngine::rearm(uint &current_buffer_line) {
   current_buffer_line = 0;
   // Retrieve the filter list from the buffer.
   m_buffer_model.retrieve_filter_set(m_filter_set);
-  LOGDBG("retrieved filter: " << m_filter_set);
+  LOGDBG_("retrieved filter: " << m_filter_set);
 }
 
 FilteredBuffer::FilteredBuffer(std::shared_ptr<IBuffer> &buffer) {

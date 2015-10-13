@@ -10,7 +10,7 @@
 
 using std::placeholders::_1;
 
-#define MULTI_THREADED_USER_INPUT 1
+#define MULTI_THREADED_USER_INPUT true
 
 Controller::Controller(BrowserModel &browser_model,
                        FBarModel &fbar_model,
@@ -28,12 +28,12 @@ Controller::Controller(BrowserModel &browser_model,
   _processor_input_producer(_event_queue),
   _event_consumer(_event_queue),
   _main_thread_id(std::this_thread::get_id())
-  {
+{
     _browser_model.register_observer(std::bind( &Controller::route_callback, this, REDRAW_BROWSER, _1 ));
     _fbar_model.register_observer(std::bind( &Controller::route_callback, this, REDRAW_FBAR, _1 ));
     _prompt_model.register_observer(std::bind( &Controller::route_callback, this, REDRAW_PROMPT, _1 ));
     _state_model.register_observer(std::bind( &Controller::route_callback, this, REDRAW_STATE, _1 ));
-  }
+}
 
 void Controller::bind_view(IView &view) {
   _views.push_back(&view);
@@ -71,6 +71,7 @@ void Controller::_route_callback(uint event_id) {
         break;
       default:
         // Browser callback will probably trigger a redraw all.
+        LOGINF("This part of the code should be unreachable");
         for (auto view: _views) view->notify_browser_changed();
       }
   } else {
@@ -84,12 +85,10 @@ void Controller::compress_redraw_event() {
   Event const *next_e = nullptr;
   next_e = _event_consumer.peep();
   // As long as we have REDRAW event
-  int compressed_event = 0;
   while (next_e != nullptr && isredraw(next_e->get_eventid())) {
     // pop them
     _event_consumer.take();
     next_e = _event_consumer.peep();
-    ++compressed_event;
   }
 }
 
@@ -97,7 +96,7 @@ void Controller::compress_redraw_event() {
 void Controller::start() {
   // Spawn the view thread
   // TODO Multi-view: Only one thread started here, should start the thread in
-  // bind_view. But to make it simple for now it is started here. Otherwose we
+  // bind_view. But to make it simple for now it is started here. Otherwise we
   // need move the thread variable in the class to be able to join it here...
   std::thread input_thread(std::bind(&Controller::view_start, this));
   // While we are not interrupted ...

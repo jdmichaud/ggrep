@@ -2,6 +2,10 @@
  *
  * The application can have many states depending of the commands requested by
  * the client.
+ * It is part of the ggrep event loop/state machine. It maps each event to an
+ * associated piece of code to be executed. Ideally this piece of code should
+ * invoke a command (Command pattern) but it can exceptionally run snippets of
+ * standalone code.
  */
 
 #ifndef __APPLICATION_STATES_H__
