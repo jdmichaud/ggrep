@@ -29,7 +29,7 @@ void print_buffer(WINDOW *w, char * const *buffer, const range_type& r,
   // We will print nlines - prompt - fbar
   uint nb_line = lines - 2; // TODO: don't assume two dead lines!
   // position on the screen
-  uint screen_line = 0;
+  uint screen_line = 1; // TODO: don't assume one line header!
   for (int i : r) {
     // Get the line to print
     const char *line = buffer[i];
@@ -43,7 +43,7 @@ void print_buffer(WINDOW *w, char * const *buffer, const range_type& r,
       uint printed_char = 0;
       do {
         // Move cursor at the beginning of the line
-        wmove(w, screen_line + 1, xoffset); // TODO: don't assume one line header
+        wmove(w, screen_line, xoffset); // TODO: don't assume one line header
         // Print the line
         printed_char += print_line(w, line, columns - xoffset, xoffset);
         // Move the line header to the rest of the string
@@ -61,15 +61,18 @@ void print_buffer(WINDOW *w, char * const *buffer, const range_type& r,
   }
   // Clear the rest of the lines
   int x, y;
-  getyx(stdscr, y, x);
+  getyx(w, y, x);
   while (nb_line) {
     // TODO: don't assume one line header
-    wmove(stdscr, lines - 1 - nb_line, xoffset);
-    wclrtoeol(stdscr);
+    wmove(w, lines - 1 - nb_line, xoffset);
+    wclrtoeol(w);
     nb_line--;
   }
 }
 
+/*
+ * Force the instanciation of print_buffer with two different types of range
+ */
 template void print_buffer< std::list<uint> >
                   (WINDOW *w, char * const *buffer, const std::list<uint>& r,
                   uint first_column, uint lines, uint columns,
@@ -78,3 +81,53 @@ template void print_buffer< range >
                   (WINDOW *w, char * const *buffer, const range& r,
                   uint first_column, uint lines, uint columns,
                   uint xoffset, bool wordwrap);
+
+template <typename range_type>
+void print_attrs(WINDOW *w, attr_list_t attr_list, char * const *buffer,
+                 const range_type& r, uint first_column, uint lines,
+                 uint columns, uint xoffset, bool wordwrap) {
+  attr_t bkp_attrs;
+  short bkp_pair;
+  // backup the current attributes
+  wattr_get(w, &bkp_attrs, &bkp_pair, bkp_opts);
+  LOGDBG("attr map size: " << attr_list.size())
+  // loop over the range
+  for (int i : r) {
+    LOGDBG("attributes on line " << i << " ?")
+    // Retrieve the attributes of the corresponding line if any
+    auto it = attr_list.find(i);
+    if (it == attr_list.end())
+      // No attribute for this line, bail
+      continue;
+    // for all the attributes of that line
+    for (auto attr: (*it).second) {
+      LOGDBG("attr.attrs_mask: " << attr.attrs_mask << " attr.start_pos: " << attr.start_pos << " attr.end_pos: " << attr.end_pos);
+      // If the string is supposed to start after the end_pos, bail
+      if (first_column > attr.end_pos) continue;
+      // Where to start on the screen
+      uint screen_offset = std::max((int) attr.start_pos - (int) first_column,
+                                    0)
+                           + xoffset;
+      // Where to start in the string
+      uint string_offset = std::max((int) attr.start_pos - (int) first_column,
+                                    0);
+      // set the attributes
+      wattr_set(w, attr.attrs_mask, bkp_pair, bkp_opts);
+      // print the attributes string
+      mvwaddnstr(w, i + 1, screen_offset, // TODO don't assume one line header
+                 &buffer[i][string_offset],
+                 attr.end_pos - string_offset);
+    }
+  }
+  wattr_set(w, bkp_attrs, bkp_pair, bkp_opts);
+}
+
+template void print_attrs< std::list<uint> >
+                 (WINDOW *w, attr_list_t attr_list, char * const *buffer,
+                 const std::list<uint>& r, uint first_column, uint lines,
+                 uint columns, uint xoffset, bool wordwrap);
+template void print_attrs< range >
+                 (WINDOW *w, attr_list_t attr_list, char * const *buffer,
+                 const range& r, uint first_column, uint lines,
+                 uint columns, uint xoffset, bool wordwrap);
+

@@ -35,7 +35,7 @@ struct tattr_t {
   tattr_t(int am, uint sp, uint ep) : attrs_mask(am), start_pos(sp), end_pos(ep) {}
 };
 
-typedef std::map<uint, std::list<tattr_t>> attr_list;
+typedef std::map<uint, std::list<tattr_t>> attr_list_t;
 
 /*
  * Custom exception raised when an error occurs on opening a file
@@ -83,7 +83,7 @@ public:
   /*!
    * Get/Set attributes of the buffer
    */
-  virtual attr_list &get_attrs() = 0;
+  virtual attr_list_t &get_attrs() = 0;
   /*!
    * Get/Set the current pointer (first line displayed) of the buffer
    */
@@ -92,12 +92,12 @@ public:
 };
 
 class Buffer : public IBuffer {
-  virtual attr_list &get_attrs() { return m_attrs; }
+  virtual attr_list_t &get_attrs() { return m_attrs; }
   virtual uint get_first_line_displayed() const { return m_first_line_displayed; }
   virtual void set_first_line_displayed(uint i) { m_first_line_displayed = i; }
 private:
   uint m_first_line_displayed;
-  attr_list m_attrs;
+  attr_list_t m_attrs;
 };
 
 class FileBuffer : public Buffer {

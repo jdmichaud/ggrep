@@ -42,8 +42,8 @@ public:
   uint get_first_line_displayed() const ;
   void set_first_line_displayed(uint i);
   // Get/Set attributes of the current buffer
-  const attr_list &get_attrs();
-  Update<attr_list> set_attrs();
+  const attr_list_t &get_attrs();
+  void clear_attrs();
 public:
   // Should we have the thread object in the model ? Looks ugly but I don't see
   // another easy and straighforward way... TODO: Improve this
@@ -57,6 +57,8 @@ public:
   void disable_filtering();
   std::shared_ptr<FileBuffer> get_file_buffer();
   void retrieve_filter_set(filter_set_t &filter_set);
+  /** Add the filtered line and an associated attribute */
+  void add_match(char *line, uint filtered_line_index, tattr_t &&attr_t);
   /*
    * Functions used to thread-safely manipulate the filter list
    */
@@ -68,6 +70,7 @@ private:
   std::shared_ptr<FilteredBuffer> m_filtered_buffer;
   std::shared_ptr<IBuffer> m_current_buffer;
   std::mutex m_filter_set_mutex;
+  std::mutex m_attr_set_mutex;
 };
 
 typedef std::list<std::unique_ptr<BufferModel> > buffer_list;

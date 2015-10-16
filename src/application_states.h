@@ -113,9 +113,7 @@ public:
   void suspend(const IEvent &) {
     LOGDBG("suspend FilterState");
   }
-  void resume(const IEvent &) {
-    LOGDBG("resume FilterState");
-  }
+  void resume(const IEvent &);
 };
 
 /*

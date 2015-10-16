@@ -145,12 +145,20 @@ void FilterState::exit(const IEvent &e) {
   m_controller.clear_filtering_on_current_buffer();
 }
 
+void FilterState::resume(const IEvent &e) {
+  LOGDBG("resume FilterState");
+  // If no filter set, just bail
+  if (m_controller.get_number_of_filter_on_current_buffer() == 0) {
+    m_invoker.create_and_execute<BacktrackCommand>();
+  }
+}
+
 AddFilterState::AddFilterState(Context &context, Controller &controller,
                          IState *parent_state) :
   State(context, controller, parent_state,
     {
-      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>();
-                                                          m_invoker.create_and_execute<CancelCurrentFilterEntry>(); } },
+      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<CancelCurrentFilterEntry>();
+                                                          m_invoker.create_and_execute<BacktrackCommand>(); } },
       { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<EnterCurrentFilterEntry>();
                                                           m_invoker.create_and_execute<BacktrackCommand>(); } },
       { new Ctrl(KEY_BACKSPACE),[this](const IEvent& b) { m_invoker.create_and_execute<BackspaceCommand>(this); } },

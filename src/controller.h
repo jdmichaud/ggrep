@@ -165,6 +165,8 @@ public:
     * as a normal filter
     */
   void unset_filter_dynamic();
+  /** Return the number of filters on the current buffer */
+  uint get_number_of_filter_on_current_buffer();
 
 private:
   /* Start the view engine */

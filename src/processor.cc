@@ -55,6 +55,8 @@ void FilterEngine::filter() {
   char * const *file_text = m_buffer_model.get_file_buffer()->get_text();
   // Position the current character string to be added
   uint current_buffer_line = 0;
+  // Last index of the filtered line
+  uint current_filtered_line = 0;
   // Get number of line in file
   uint number_of_line_in_file =
     m_buffer_model.get_file_buffer()->get_number_of_line();
@@ -74,7 +76,7 @@ void FilterEngine::filter() {
       LOGDBG_("filtering started, signal: " << m_signaled);
       // This instruction might seem strange but we need to get out of the loop
       // by resetting the line pointer...
-      if (m_signaled) { current_buffer_line = 0; }
+      if (m_signaled) { current_buffer_line = 0; current_filtered_line = 0; }
     }
     // m_signaled will be set to true if someone changed the filters or on the
     // first loop (set in ProcessorThread::start)
@@ -85,18 +87,16 @@ void FilterEngine::filter() {
     if (match(file_text[current_buffer_line], m_filter_set, matches)) {
       // Yes, add it to the model
       LOGDBG_("line " << current_buffer_line << " matches");
-      m_buffer_model.add_filtered_line(file_text[current_buffer_line]);
-      // Add the matching information as attributes
-      m_buffer_model.set_attrs().update().emplace(
-        std::make_pair<uint, std::list<tattr_t> >(
-          std::move(current_buffer_line),
-          { tattr_t(A_REVERSE,
-                    matches.position(),
-                    matches.position() + matches.length()) })
+      m_buffer_model.add_match(file_text[current_buffer_line],
+                               current_filtered_line,
+                               tattr_t(A_REVERSE,
+                                       matches.position(),
+                                       matches.position() + matches.length())
       );
     }
     // Look at the next line
     ++current_buffer_line;
+    ++current_filtered_line;
     // Compute the progress as percentage of the total number of lines
     uint progress = (float) current_buffer_line /
       (float) number_of_line_in_file * 100;
@@ -112,7 +112,7 @@ void FilterEngine::rearm(uint &current_buffer_line) {
   LOGDBG_("clear filtered lined");
   m_buffer_model.clear_filtered_line();
   // Clear the attributes too
-  m_buffer_model.set_attrs().update().clear();
+  m_buffer_model.clear_attrs();
   // Position the current character string to be added
   current_buffer_line = 0;
   // Retrieve the filter list from the buffer.

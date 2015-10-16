@@ -52,13 +52,13 @@ void BufferModel::set_first_line_displayed(uint i) {
   notify_observers();
 }
 
-const attr_list &BufferModel::get_attrs() {
+const attr_list_t &BufferModel::get_attrs() {
   return m_current_buffer->get_attrs();
 }
 
-Update<attr_list> BufferModel::set_attrs() {
+void BufferModel::clear_attrs() {
   notify_callback_t f = std::bind(&BufferModel::notify_observers, this);
-  return Update<attr_list>(m_current_buffer->get_attrs(), f);
+  Update<attr_list_t>(m_current_buffer->get_attrs(), f).update().clear();
 }
 
 void BufferModel::clear_filtered_line() {
@@ -122,3 +122,14 @@ void BufferModel::remove_last_filter() {
   m_filter.signal();
 }
 
+void BufferModel::add_match(char *line, uint filtered_line_index,
+                            tattr_t &&attr_t) {
+  std::lock_guard<std::mutex> lock(m_attr_set_mutex);
+  (*this).add_filtered_line(line);
+  // Add the matching information as attributes
+  m_current_buffer->get_attrs().emplace(
+    std::make_pair<uint, std::list<tattr_t> >(
+      (uint) filtered_line_index, // Why do we need a cast here?
+      { attr_t })
+  );
+}

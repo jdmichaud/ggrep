@@ -104,9 +104,15 @@ void TerminalView::redraw_buffer(BufferModel &buffer_model) {
       || _state_model.get_state() == state_e::FILTER_STATE
       || _state_model.get_state() == state_e::ADD_FILTER_STATE)
   {
+    LOGDBG("range: buffer_model.get_first_line_displayed(): " << buffer_model.get_first_line_displayed())
+    LOGDBG("range: buffer_model.get_number_of_line(): " << buffer_model.get_number_of_line())
     print_buffer(stdscr, buffer_model.get_text(),
                  range(buffer_model.get_first_line_displayed(),
                        buffer_model.get_number_of_line()),
+                 0, this->_nlines, this->_ncols, 0, false);
+    print_attrs(stdscr, buffer_model.get_attrs(), buffer_model.get_text(),
+                 range(buffer_model.get_first_line_displayed(),
+                       buffer_model.get_first_line_displayed() + this->_nlines),
                  0, this->_nlines, this->_ncols, 0, false);
     redraw_prompt(_prompt_model);
   }
