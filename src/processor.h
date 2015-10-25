@@ -109,6 +109,8 @@ public:
    */
   /** Clear the filtered line buffer */
   void clear();
+  /** Clear the attributes */
+  virtual void clear_attrs();
   /** Add a line to the filtered line buffer */
   void add_line(char *line);
 private:

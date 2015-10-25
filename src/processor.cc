@@ -89,10 +89,8 @@ void FilterEngine::filter() {
       LOGDBG_("line " << current_buffer_line << " matches");
       m_buffer_model.add_match(file_text[current_buffer_line],
                                current_filtered_line,
-                               tattr_t(A_REVERSE,
-                                       matches.position(),
-                                       matches.position() + matches.length())
-      );
+                               matches.position(),
+                               matches.position() + matches.length());
     }
     // Look at the next line
     ++current_buffer_line;
@@ -126,6 +124,9 @@ FilteredBuffer::FilteredBuffer(std::shared_ptr<IBuffer> &buffer) {
   m_filtered_lines = new char*[m_original_number_of_line];
   memset(m_filtered_lines, 0, m_original_number_of_line * sizeof (char));
   number_of_filtered_line = 0;
+  // Initialize attrs array
+  m_attrs = new tattr_t[m_original_number_of_line * sizeof (tattr_t)];
+  (*this).clear_attrs();
 }
 
 FilteredBuffer::~FilteredBuffer() {
@@ -134,6 +135,10 @@ FilteredBuffer::~FilteredBuffer() {
 
 char **FilteredBuffer::get_text() const {
   return m_filtered_lines;
+}
+
+void FilteredBuffer::clear_attrs() {
+  memset(m_attrs, 0, (m_original_number_of_line + 1) * sizeof (tattr_t));
 }
 
 uint FilteredBuffer::get_original_number_of_line() const {

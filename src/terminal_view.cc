@@ -112,7 +112,11 @@ void TerminalView::redraw_buffer(BufferModel &buffer_model) {
                  0, this->_nlines, this->_ncols, 0, false);
     print_attrs(stdscr, buffer_model.get_attrs(), buffer_model.get_text(),
                  range(buffer_model.get_first_line_displayed(),
-                       buffer_model.get_first_line_displayed() + this->_nlines),
+                       std::max(0,
+                        (int) std::min(
+                         buffer_model.get_first_line_displayed() + this->_nlines,
+                         buffer_model.get_number_of_line()
+                        ) - 1)),
                  0, this->_nlines, this->_ncols, 0, false);
     redraw_prompt(_prompt_model);
   }

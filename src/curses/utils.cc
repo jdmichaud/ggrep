@@ -90,34 +90,26 @@ void print_attrs(WINDOW *w, attr_list_t attr_list, char * const *buffer,
   short bkp_pair;
   // backup the current attributes
   wattr_get(w, &bkp_attrs, &bkp_pair, bkp_opts);
-  LOGDBG("attr map size: " << attr_list.size())
   // loop over the range
   for (int i : r) {
-    LOGDBG("attributes on line " << i << " ?")
-    // Retrieve the attributes of the corresponding line if any
-    auto it = attr_list.find(i);
-    if (it == attr_list.end())
-      // No attribute for this line, bail
-      continue;
-    // for all the attributes of that line
-    for (auto attr: (*it).second) {
-      LOGDBG("attr.attrs_mask: " << attr.attrs_mask << " attr.start_pos: " << attr.start_pos << " attr.end_pos: " << attr.end_pos);
-      // If the string is supposed to start after the end_pos, bail
-      if (first_column > attr.end_pos) continue;
-      // Where to start on the screen
-      uint screen_offset = std::max((int) attr.start_pos - (int) first_column,
-                                    0)
-                           + xoffset;
-      // Where to start in the string
-      uint string_offset = std::max((int) attr.start_pos - (int) first_column,
-                                    0);
-      // set the attributes
-      wattr_set(w, attr.attrs_mask, bkp_pair, bkp_opts);
-      // print the attributes string
-      mvwaddnstr(w, i + 1, screen_offset, // TODO don't assume one line header
-                 &buffer[i][string_offset],
-                 attr.end_pos - string_offset);
-    }
+    // Check if an attribute is set
+    if (!attr_list[i].attrs_mask) continue;
+    LOGDBG("attr_list[i].attrs_mask: " << attr_list[i].attrs_mask << " attr_list[i].start_pos: " << attr_list[i].start_pos << " attr_list[i].end_pos: " << attr_list[i].end_pos);
+    // If the string is supposed to start after the end_pos, bail
+    if (first_column > attr_list[i].end_pos) continue;
+    // Where to start on the screen
+    uint screen_offset = std::max((int) attr_list[i].start_pos - (int) first_column,
+                                  0)
+                         + xoffset;
+    // Where to start in the string
+    uint string_offset = std::max((int) attr_list[i].start_pos - (int) first_column,
+                                  0);
+    // set the attributes
+    wattr_set(w, attr_list[i].attrs_mask, bkp_pair, bkp_opts);
+    // print the attributes string
+    mvwaddnstr(w, i + 1, screen_offset, // TODO don't assume one line header
+               &buffer[i][string_offset],
+               attr_list[i].end_pos - string_offset);
   }
   wattr_set(w, bkp_attrs, bkp_pair, bkp_opts);
 }

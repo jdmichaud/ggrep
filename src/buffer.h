@@ -35,7 +35,10 @@ struct tattr_t {
   tattr_t(int am, uint sp, uint ep) : attrs_mask(am), start_pos(sp), end_pos(ep) {}
 };
 
-typedef std::map<uint, std::list<tattr_t>> attr_list_t;
+/*
+ * An array of array
+ */
+typedef tattr_t *attr_list_t;
 
 /*
  * Custom exception raised when an error occurs on opening a file
@@ -83,7 +86,8 @@ public:
   /*!
    * Get/Set attributes of the buffer
    */
-  virtual attr_list_t &get_attrs() = 0;
+  virtual attr_list_t get_attrs() = 0;
+  virtual void clear_attrs() = 0;
   /*!
    * Get/Set the current pointer (first line displayed) of the buffer
    */
@@ -92,12 +96,13 @@ public:
 };
 
 class Buffer : public IBuffer {
-  virtual attr_list_t &get_attrs() { return m_attrs; }
+  virtual attr_list_t get_attrs() { return m_attrs; }
   virtual uint get_first_line_displayed() const { return m_first_line_displayed; }
   virtual void set_first_line_displayed(uint i) { m_first_line_displayed = i; }
+protected:
+  attr_list_t m_attrs;
 private:
   uint m_first_line_displayed;
-  attr_list_t m_attrs;
 };
 
 class FileBuffer : public Buffer {
@@ -118,6 +123,9 @@ public:
     m_buffer[m_nb_lines] = 0;
     // Load the whole file
     (*this).load({0, -1});
+    // Initialize attrs array
+    m_attrs = new tattr_t[m_nb_lines + 1];
+    (*this).clear_attrs();
     LOGINF("FileBuffer loaded (" << this << ")");
   }
 
@@ -126,7 +134,8 @@ public:
     m_file.close();
     for (uint i = 0; i < m_nb_lines; ++i)
       if (m_buffer[i]) delete m_buffer[i];
-    delete m_buffer;
+    delete[] m_buffer;
+    delete[] m_attrs;
   }
 
   /*
@@ -135,6 +144,13 @@ public:
   char** get_text() const {
     LOGDBG("get_text");
     return m_buffer;
+  }
+
+  /*
+   * Reset the attributes array
+   */
+  virtual void clear_attrs() {
+    memset(m_attrs, 0, (m_nb_lines + 1) * sizeof (tattr_t));
   }
 
   /*
