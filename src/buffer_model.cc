@@ -8,7 +8,8 @@
 #include "processor.h"
 
 BufferModel::BufferModel(std::shared_ptr<IBuffer> &&buffer) :
-  m_filter(*this), m_file_buffer(std::dynamic_pointer_cast<FileBuffer>(buffer))
+  m_display_attributes(true), m_filter(*this),
+  m_file_buffer(std::dynamic_pointer_cast<FileBuffer>(buffer))
 {
   LOGDBG("BufferModel creator " << this);
   // Set the current buffer as the file buffer
@@ -70,7 +71,6 @@ void BufferModel::clear_filtered_line() {
 
 void BufferModel::add_filtered_line(char *line) {
   m_filtered_buffer->add_line(line);
-  notify_observers();
 }
 
 void BufferModel::enable_filtering() {
@@ -128,7 +128,12 @@ void BufferModel::add_match(char *line, uint filtered_line_index,
                             uint start_pos, uint end_pos) {
   (*this).add_filtered_line(line);
   // Add the matching information as attributes
-  m_current_buffer->get_attrs()[filtered_line_index].attrs_mask = A_REVERSE;
   m_current_buffer->get_attrs()[filtered_line_index].start_pos = start_pos;
   m_current_buffer->get_attrs()[filtered_line_index].end_pos = end_pos;
+  // Set the attribute at the end as it is the key to determine if an attribute
+  // is set and we don't want the view thread to consider the attribute set when
+  // the position are not yet set
+  m_current_buffer->get_attrs()[filtered_line_index].attrs_mask = A_REVERSE;
+  LOGDBG("add attr line " << filtered_line_index);
+  notify_observers();
 }

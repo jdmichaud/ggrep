@@ -51,18 +51,18 @@ class Update {
 public:
   Update(T& value, notify_callback_t &callback) :
     m_value(value), m_callback(callback) {
-    LOGDBG("constructor of Update " << this << " -- callback: " << &m_callback)
+    LOGDBG_("constructor of Update " << this << " -- callback: " << &m_callback)
   }
   Update(const Update &&u) : m_value(u.m_value), m_callback(u.m_callback) {
-    LOGDBG("copy of Update " << &u << " to Update " << this << " -- callback: " << &m_callback)
+    LOGDBG_("copy of Update " << &u << " to Update " << this << " -- callback: " << &m_callback)
   }
   ~Update() {
-    LOGDBG("destructor of Update " << this << " -- callback: " << &m_callback)
+    LOGDBG_("destructor of Update " << this << " -- callback: " << &m_callback)
     m_callback();
   }
 
   T& update() {
-    LOGDBG("update of Update " << this << " -- callback: " << &m_callback)
+    LOGDBG_("update of Update " << this << " -- callback: " << &m_callback)
     return m_value;
   }
 

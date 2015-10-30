@@ -74,13 +74,16 @@ void FilterEngine::filter() {
       LOGDBG_("filtering paused");
       (*this).wait(); // Wait until someone signals us
       LOGDBG_("filtering started, signal: " << m_signaled);
+      // Have we been interrupted ?
+      if (m_interrupted) return;
       // This instruction might seem strange but we need to get out of the loop
       // by resetting the line pointer...
       if (m_signaled) { current_buffer_line = 0; current_filtered_line = 0; }
     }
     // m_signaled will be set to true if someone changed the filters or on the
     // first loop (set in ProcessorThread::start)
-    if (m_signaled) { (*this).rearm(current_buffer_line); }
+    if (m_signaled) { (*this).rearm(current_buffer_line,
+                                    current_filtered_line); }
     // Have we been interrupted ?
     if (m_interrupted) return;
     // Does the current line match the filter set
@@ -91,10 +94,10 @@ void FilterEngine::filter() {
                                current_filtered_line,
                                matches.position(),
                                matches.position() + matches.length());
+      ++current_filtered_line;
     }
     // Look at the next line
     ++current_buffer_line;
-    ++current_filtered_line;
     // Compute the progress as percentage of the total number of lines
     uint progress = (float) current_buffer_line /
       (float) number_of_line_in_file * 100;
@@ -104,15 +107,17 @@ void FilterEngine::filter() {
   }
 }
 
-void FilterEngine::rearm(uint &current_buffer_line) {
+void FilterEngine::rearm(uint &current_buffer_line,
+                         uint &current_filtered_line) {
   (*this).reset_signal(); // reset it to false
+  // Clear the attributes first
+  m_buffer_model.clear_attrs();
   // Clear the model buffer
   LOGDBG_("clear filtered lined");
   m_buffer_model.clear_filtered_line();
-  // Clear the attributes too
-  m_buffer_model.clear_attrs();
   // Position the current character string to be added
   current_buffer_line = 0;
+  current_filtered_line = 0;
   // Retrieve the filter list from the buffer.
   m_buffer_model.retrieve_filter_set(m_filter_set);
   LOGDBG_("retrieved filter: " << m_filter_set);

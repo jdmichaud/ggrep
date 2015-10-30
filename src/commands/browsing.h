@@ -125,7 +125,8 @@ private:
  */
 class LeftCommand : public Command {
 public:
-  LeftCommand(Controller &controller, Invoker &invoker, IState *state, IText *text) :
+  LeftCommand(Controller &controller, Invoker &invoker, IState *state,
+              IText *text) :
     Command(controller, invoker, state), m_text(text) {}
 
   virtual void execute() {
@@ -143,7 +144,8 @@ private:
  */
 class RightCommand : public Command {
 public:
-  RightCommand(Controller &controller, Invoker &invoker, IState *state, IText *text) :
+  RightCommand(Controller &controller, Invoker &invoker, IState *state,
+               IText *text) :
     Command(controller, invoker, state), m_text(text) {}
 
   virtual void execute() {
@@ -161,7 +163,8 @@ private:
  */
 class LeftWordCommand : public Command {
 public:
-  LeftWordCommand(Controller &controller, Invoker &invoker, IState *state, IText *text) :
+  LeftWordCommand(Controller &controller, Invoker &invoker, IState *state,
+                  IText *text) :
     Command(controller, invoker, state), m_text(text) {}
 
   virtual void execute() {
@@ -179,7 +182,8 @@ private:
  */
 class RightWordCommand : public Command {
 public:
-  RightWordCommand(Controller &controller, Invoker &invoker, IState *state, IText *text) :
+  RightWordCommand(Controller &controller, Invoker &invoker, IState *state,
+                   IText *text) :
     Command(controller, invoker, state), m_text(text) {}
 
   virtual void execute() {
@@ -197,7 +201,8 @@ private:
  */
 class BegLineCommand : public Command {
 public:
-  BegLineCommand(Controller &controller, Invoker &invoker, IState *state, IText *text) :
+  BegLineCommand(Controller &controller, Invoker &invoker, IState *state,
+                 IText *text) :
     Command(controller, invoker, state), m_text(text) {}
 
   virtual void execute() {
@@ -217,7 +222,8 @@ private:
  */
 class EndLineCommand : public Command {
 public:
-  EndLineCommand(Controller &controller, Invoker &invoker, IState *state, IText *text) :
+  EndLineCommand(Controller &controller, Invoker &invoker, IState *state,
+                 IText *text) :
     Command(controller, invoker, state), m_text(text) {}
 
   virtual void execute() {
@@ -232,5 +238,21 @@ private:
   pos m_previous_curpos;
 };
 
+
+
+class ToggleAttributesCommand : public Command {
+public:
+  ToggleAttributesCommand(Controller &controller, Invoker &invoker,
+                          IState *state) :
+    Command(controller, invoker, state) {}
+
+  virtual void execute() {
+    m_controller.toggle_attributes();
+  }
+  virtual void unexecute() {
+    m_controller.toggle_attributes();
+  }
+private:
+};
 
 #endif //__BROWSING_H__

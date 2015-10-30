@@ -56,35 +56,35 @@ uint TerminalView::init() {
 }
 
 void TerminalView::notify_browser_changed() {
-  LOGDBG("notify_browser_changed called")
+  LOGDBG_("notify_browser_changed called")
   this->redraw_all();
   // Refresh the screen
   refresh();
 }
 
 void TerminalView::notify_buffer_changed() {
-  LOGDBG("notify_buffer_changed called")
+  LOGDBG_("notify_buffer_changed called")
   this->redraw_all();
   // Refresh the screen
   refresh();
 }
 
 void TerminalView::notify_fbar_changed() {
-  LOGDBG("notify_fbar_changed called")
+  LOGDBG_("notify_fbar_changed called")
   this->redraw_fbar(_fbar_model);
   // Refresh the screen
   refresh();
 }
 
 void TerminalView::notify_prompt_changed() {
-  LOGDBG("notify_prompt_changed called")
+  LOGDBG_("notify_prompt_changed called")
   this->redraw_prompt(_prompt_model);
   // Refresh the screen
   refresh();
 }
 
 void TerminalView::notify_state_changed() {
-  LOGDBG("notify_state_changed called")
+  LOGDBG_("notify_state_changed called")
   this->redraw_all();
   // Refresh the screen
   refresh();
@@ -98,32 +98,33 @@ void TerminalView::redraw_all() {
 }
 
 void TerminalView::redraw_buffer(BufferModel &buffer_model) {
-  LOGDBG("TerminalView::redraw_buffer called");
+  LOGDBG_("TerminalView::redraw_buffer called");
   if (_state_model.get_state() == state_e::OPEN_STATE
       || _state_model.get_state() == state_e::BROWSE_STATE
       || _state_model.get_state() == state_e::FILTER_STATE
       || _state_model.get_state() == state_e::ADD_FILTER_STATE)
   {
-    LOGDBG("range: buffer_model.get_first_line_displayed(): " << buffer_model.get_first_line_displayed())
-    LOGDBG("range: buffer_model.get_number_of_line(): " << buffer_model.get_number_of_line())
+    uint first_line = buffer_model.get_first_line_displayed();
+    uint number_of_line = buffer_model.get_number_of_line();
+    LOGDBG_("range: buffer_model.get_first_line_displayed(): " << first_line)
+    LOGDBG_("range: buffer_model.get_number_of_line(): " << number_of_line)
     print_buffer(stdscr, buffer_model.get_text(),
-                 range(buffer_model.get_first_line_displayed(),
-                       buffer_model.get_number_of_line()),
+                 range(first_line, number_of_line),
                  0, this->_nlines, this->_ncols, 0, false);
-    print_attrs(stdscr, buffer_model.get_attrs(), buffer_model.get_text(),
-                 range(buffer_model.get_first_line_displayed(),
-                       std::max(0,
-                        (int) std::min(
-                         buffer_model.get_first_line_displayed() + this->_nlines,
-                         buffer_model.get_number_of_line()
-                        ) - 1)),
-                 0, this->_nlines, this->_ncols, 0, false);
+    if (buffer_model.get_display_attributes()) {
+      print_attrs(stdscr, buffer_model.get_attrs(), buffer_model.get_text(),
+                   range(first_line,
+                         std::max(0,
+                          (int) std::min(first_line + this->_nlines,
+                                         number_of_line) - 0)),
+                   0, this->_nlines, this->_ncols, 0, false);
+    }
     redraw_prompt(_prompt_model);
   }
 }
 
 void TerminalView::redraw_fbar(FBarModel &fbar_model) {
-  LOGDBG("redraw_fbar called")
+  LOGDBG_("redraw_fbar called")
   // Draw the function bar
   wmove(stdscr, 0, 0);
   auto &last = *(--fbar_model.get_functions().end());
@@ -142,7 +143,7 @@ void TerminalView::redraw_fbar(FBarModel &fbar_model) {
 }
 
 void TerminalView::redraw_prompt(PromptModel &prompt_model) {
-  LOGDBG("redraw_prompt called with application state: " <<
+  LOGDBG_("redraw_prompt called with application state: " <<
          _state_model.get_state());
   // move the cursor at the beginning of the line
   wmove(stdscr, this->_nlines - 1, 0);
@@ -161,7 +162,7 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
       std::max((int) std::min(prompt_model.get_cursor_position().x,
                              _prompt_string_index),
                (int) (prompt_model.get_cursor_position().x - this->_ncols + 1));
-    LOGDBG("_prompt_string_index: " << _prompt_string_index);
+    LOGDBG_("_prompt_string_index: " << _prompt_string_index);
     // Print the prompt
     wprintw(stdscr, "%s",
             &prompt_model.get_prompt().c_str()[_prompt_string_index]);
@@ -207,15 +208,15 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
 }
 
 void TerminalView::redraw_cursor(StateModel &state_model) {
-  LOGDBG("application state: " << state_model.get_state());
+  LOGDBG_("application state: " << state_model.get_state());
   /*
    * Display the curso when a state prompt is expecting an input
    */
   if (state_model.get_state() == state_e::OPENING_STATE
       || state_model.get_state() == state_e::ADD_FILTER_STATE) {
     curs_set(1);
-    LOGDBG("_prompt_model.get_cursor_position().x: " << _prompt_model.get_cursor_position().x);
-    LOGDBG("_prompt_string_index: " << _prompt_string_index);
+    LOGDBG_("_prompt_model.get_cursor_position().x: " << _prompt_model.get_cursor_position().x);
+    LOGDBG_("_prompt_string_index: " << _prompt_string_index);
     wmove(stdscr, this->_nlines - 1,
           _prompt_model.get_cursor_position().x - _prompt_string_index);
   }

@@ -126,17 +126,18 @@ public:
     // If the filter size is on the threshold and we added character, the filter
     // needs to be added
     if (m_filter.size() == FILTER_STRING_MIN_SIZE
-        && m_input != KEY_BKSP && m_input != KEY_DC) {
+        && m_input != KEY_BACKSPACE && m_input != KEY_DC) {
       m_controller.add_filter(m_filter);
       m_controller.set_filter_dynamic();
     }
     // If the filter size is greater then the threshold, then we just update it
     else if (m_filter.size() > FILTER_STRING_MIN_SIZE)
       m_controller.update_last_filter(m_filter);
-    // If the filter size is *right* below the threashold and we just removed a
-    // character, we need to remove the filter
-    else if (m_filter.size() < FILTER_STRING_MIN_SIZE - 1
-             && m_input == KEY_BKSP && m_input == KEY_DC) {
+    // If the filter size is below the threashold, we just removed a
+    // character and we have a dynamic filter we need to remove the filter
+    else if (m_filter.size() <= FILTER_STRING_MIN_SIZE
+             && (m_input == KEY_BACKSPACE || m_input == KEY_DC)
+             && m_controller.get_filter_dynamic()) {
       m_controller.remove_last_filter();
       m_controller.unset_filter_dynamic();
     }
@@ -158,9 +159,11 @@ public:
     Command(controller, invoker, state) {}
 
   virtual void execute() {
-    // remove the current filter
-    m_controller.remove_last_filter();
-    m_controller.unset_filter_dynamic();
+    // if currently entering a remove the current filter
+    if (m_controller.get_filter_dynamic()) {
+      m_controller.remove_last_filter();
+      m_controller.unset_filter_dynamic();
+    }
   }
   virtual void unexecute() { /* non unexecutable */ }
   virtual bool unexecutable() { return false; };

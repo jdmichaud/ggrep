@@ -29,6 +29,7 @@ public:
 
   DECLARE_ENTRY( BufferModel, filter_set, filter_set_t );
   DECLARE_ENTRY( BufferModel, filter_processing_progress, uint );
+  DECLARE_ENTRY( BufferModel, display_attributes, bool );
 public:
   // Set the current visible buffer
   void set_current_buffer(std::shared_ptr<IBuffer>);

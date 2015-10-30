@@ -340,6 +340,11 @@ void Controller::switch_filter_type() {
   buffer->m_filter.signal();
 }
 
+bool Controller::get_filter_dynamic() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  return buffer->set_filter_set().update().dynamic;
+}
+
 void Controller::set_filter_dynamic() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   buffer->set_filter_set().update().dynamic = true;
@@ -353,4 +358,9 @@ void Controller::unset_filter_dynamic() {
 uint Controller::get_number_of_filter_on_current_buffer() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   return buffer->get_filter_set().filters.size();
+}
+
+uint Controller::toggle_attributes() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  return buffer->set_display_attributes().update() = !buffer->get_display_attributes();
 }

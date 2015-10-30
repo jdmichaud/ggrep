@@ -125,11 +125,11 @@ public:
    */
   virtual bool handle(const IEvent &event) {
     for (auto action: m_action_map) {
-      LOGDBG("action.first: " << typeid(*action.first).name() << " " <<
-             "get_eventid: " << action.first->get_eventid() << " " <<
-             "state: " << *this);
+      LOGDBG_("action.first: " << typeid(*action.first).name() << " " <<
+              "get_eventid: " << action.first->get_eventid() << " " <<
+              "state: " << *this);
       if (action.first->is_equal(event)) {
-        LOGDBG("Found the event in the map");
+        LOGDBG_("Found the event in the map");
         action.second(event);
         return true;
       }
@@ -137,7 +137,7 @@ public:
     // If we are here, then no appropriate event was found in the action map.
     // Forwarding to parent if have a parent, otherwise just return false
     if (m_parent_state != nullptr) {
-      LOGDBG("Could not find the event, trying with parent state");
+      LOGDBG_("Could not find the event, trying with parent state");
       return m_parent_state->handle(event);
     }
     return false;

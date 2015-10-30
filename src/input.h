@@ -59,6 +59,10 @@ inline bool operator==(const Input &lhs, uint keycode) {
   return lhs.is_equal(keycode);
 }
 
+inline bool operator!=(const Input &lhs, uint keycode) {
+  return !lhs.is_equal(keycode);
+}
+
 inline bool isprint(uint keycode) {
   return (keycode >= 32 && keycode <= int('~'));
 }

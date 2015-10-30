@@ -165,8 +165,12 @@ public:
     * as a normal filter
     */
   void unset_filter_dynamic();
+  /** Return a boolean set to true if we are currently editing a filter */
+  bool get_filter_dynamic();
   /** Return the number of filters on the current buffer */
   uint get_number_of_filter_on_current_buffer();
+  /** Toggle the display of attributes on the current buffer */
+  uint toggle_attributes();
 
 private:
   /* Start the view engine */

@@ -13,12 +13,12 @@ DefaultState::DefaultState(Context &context, Controller &controller,
                            IState *parent_state) :
   State(context, controller, parent_state,
     {
-      { new Event(REDRAW_BUFFER), [&controller](const IEvent& b) { LOGDBG("REDRAW_BUFFER"); controller._route_callback(REDRAW_BROWSER); } },
-      { new Event(REDRAW_BROWSER),[&controller](const IEvent& b) { LOGDBG("REDRAW_BROWSER"); controller._route_callback(REDRAW_BROWSER); } },
-      { new Event(REDRAW_FBAR),   [&controller](const IEvent& b) { LOGDBG("REDRAW_FBAR"); controller._route_callback(REDRAW_FBAR); } },
-      { new Event(REDRAW_PROMPT), [&controller](const IEvent& b) { LOGDBG("REDRAW_PROMPT"); controller._route_callback(REDRAW_PROMPT); } },
-      { new Event(REDRAW_STATE),  [&controller](const IEvent& b) { LOGDBG("REDRAW_STATE"); controller._route_callback(REDRAW_STATE); } },
-      { new Event(REDRAW_ALL),    [&controller](const IEvent& b) { LOGDBG("REDRAW_ALL"); controller._route_callback(REDRAW_ALL); } },
+      { new Event(REDRAW_BUFFER), [&controller](const IEvent& b) { controller._route_callback(REDRAW_BROWSER); } },
+      { new Event(REDRAW_BROWSER),[&controller](const IEvent& b) { controller._route_callback(REDRAW_BROWSER); } },
+      { new Event(REDRAW_FBAR),   [&controller](const IEvent& b) { controller._route_callback(REDRAW_FBAR); } },
+      { new Event(REDRAW_PROMPT), [&controller](const IEvent& b) { controller._route_callback(REDRAW_PROMPT); } },
+      { new Event(REDRAW_STATE),  [&controller](const IEvent& b) { controller._route_callback(REDRAW_STATE); } },
+      { new Event(REDRAW_ALL),    [&controller](const IEvent& b) { controller._route_callback(REDRAW_ALL); } },
     }, state_e::DEFAULT_STATE)
 { }
 
@@ -110,6 +110,7 @@ BrowseState::BrowseState(Context &context, Controller &controller,
       // Ctrl+F = KEY_ACK
       { new Ctrl(KEY_ACK),    [this](const IEvent& b) { m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::FILTER_STATE, b);
                                                         m_invoker.create_and_execute<InjectCommand>(KEY_ACK); } },
+      { new Ctrl(KEY_SHD),    [this](const IEvent& b) { m_invoker.create_and_execute<ToggleAttributesCommand>(); } },
       { new Arrow(KEY_DOWN),  [this](const IEvent& b) { m_invoker.create_and_execute<DownCommand>(); } },
       { new Arrow(KEY_UP),    [this](const IEvent& b) { m_invoker.create_and_execute<UpCommand>(); } },
       { new Arrow(KEY_NPAGE), [this](const IEvent& b) { m_invoker.create_and_execute<PageDownCommand>(); } },
@@ -161,8 +162,14 @@ AddFilterState::AddFilterState(Context &context, Controller &controller,
                                                           m_invoker.create_and_execute<BacktrackCommand>(); } },
       { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<EnterCurrentFilterEntry>();
                                                           m_invoker.create_and_execute<BacktrackCommand>(); } },
-      { new Ctrl(KEY_BACKSPACE),[this](const IEvent& b) { m_invoker.create_and_execute<BackspaceCommand>(this); } },
-      { new Ctrl(KEY_DC),       [this](const IEvent& b) { m_invoker.create_and_execute<DeleteCommand>(this); } },
+      { new Ctrl(KEY_BACKSPACE),[this](const IEvent& b) { m_invoker.create_and_execute<BackspaceCommand>(this);
+                                                          m_invoker.create_and_execute<UpdateCurrentFilterEntry,
+                                                                                       const std::string &,
+                                                                                       const IEvent &>(m_text, b); } },
+      { new Ctrl(KEY_DC),       [this](const IEvent& b) { m_invoker.create_and_execute<DeleteCommand>(this);
+                                                          m_invoker.create_and_execute<UpdateCurrentFilterEntry,
+                                                                                       const std::string &,
+                                                                                       const IEvent &>(m_text, b); } },
       { new Arrow(KEY_LEFT),    [this](const IEvent& b) { m_invoker.create_and_execute<LeftCommand>(this); } },
       { new Arrow(KEY_RIGHT),   [this](const IEvent& b) { m_invoker.create_and_execute<RightCommand>(this); } },
       { new Arrow(C_KEY_LEFT),  [this](const IEvent& b) { m_invoker.create_and_execute<LeftWordCommand>(this); } },
@@ -170,8 +177,8 @@ AddFilterState::AddFilterState(Context &context, Controller &controller,
       { new Nav(KEY_HOME),      [this](const IEvent& b) { m_invoker.create_and_execute<BegLineCommand>(this); } },
       { new Nav(KEY_END),       [this](const IEvent& b) { m_invoker.create_and_execute<EndLineCommand>(this); } },
       { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this);
-                                                          m_invoker.create_and_execute<UpdateCurrentFilterEntry, 
-                                                                                       const std::string &, 
+                                                          m_invoker.create_and_execute<UpdateCurrentFilterEntry,
+                                                                                       const std::string &,
                                                                                        const IEvent &>(m_text, b); } }
     }, state_e::FILTER_STATE)
 { }

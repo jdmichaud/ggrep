@@ -132,7 +132,7 @@ public:
    * Re-arm the filter state so that the buffer of filtered line is clear, and a
    * new filtering can begin
    */
-  void rearm(uint &current_buffer_line);
+  void rearm(uint &current_buffer_line, uint &current_filtered_line);
 private:
   /*
    * Match a character string from the buffer with a particular filter set.
