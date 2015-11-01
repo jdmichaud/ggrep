@@ -96,6 +96,8 @@ public:
 };
 
 class Buffer : public IBuffer {
+public:
+  Buffer() : m_first_line_displayed(0) {  }
   virtual attr_list_t get_attrs() { return m_attrs; }
   virtual uint get_first_line_displayed() const { return m_first_line_displayed; }
   virtual void set_first_line_displayed(uint i) { m_first_line_displayed = i; }
@@ -107,7 +109,7 @@ private:
 
 class FileBuffer : public Buffer {
 public:
-  FileBuffer(const std::string &filepath) : m_filepath(filepath) {
+  FileBuffer(const std::string &filepath) : Buffer(), m_filepath(filepath) {
     LOGDBG("FileBuffer constructor " << this);
     // Check the file type (binary or text)
     if (is_binary())

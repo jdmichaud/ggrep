@@ -291,8 +291,15 @@ void Controller::scroll_buffer_page_down() {
 
 void Controller::scroll_buffer_end() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
-  buffer->set_first_line_displayed(
-    buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2);
+  // TODO: +2? Don't assume one line header and prompt line
+  if (buffer->get_number_of_line() > _browser_model.get_view_line_number() + 2) {
+    // Scroll to the end if the file is bigger than the view
+    buffer->set_first_line_displayed(
+      buffer->get_number_of_line() - _browser_model.get_view_line_number() + 2);
+  } else {
+    // Else, just go to the top
+    buffer->set_first_line_displayed(0);
+  }
 }
 
 /*
