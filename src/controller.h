@@ -116,6 +116,8 @@ public:
   void raise_error(const std::string &error_msg);
 
   /* Browsing APIs */
+  uint get_first_line_displayed();
+  uint set_first_line_displayed();
   /*
    * Set the size of the view. In a "normal" MVC model, the view would handle
    * directly some user actions like scrolling. In out design, the view is
@@ -171,6 +173,30 @@ public:
   uint get_number_of_filter_on_current_buffer();
   /** Toggle the display of attributes on the current buffer */
   uint toggle_attributes();
+
+  /* Searching APIs */
+  /**
+    * Set the search term in the buffer model
+    */
+  void set_search_term(const std::string &term);
+  /**
+    * Start the search processor
+    */
+  void find_search_term();
+  /**
+    * Get the next found item from the search processor and scroll the first
+    * line to that item
+    */
+  void go_to_next_found_item();
+  /**
+    * Get the previous found item from the search processor and scroll the first
+    * line to that item
+    */
+  void go_to_previous_found_item();
+  /**
+    * Stop the search processor and clear its result
+    */
+  void stop_search();
 
 private:
   /* Start the view engine */

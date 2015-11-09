@@ -132,7 +132,9 @@ public:
 };
 
 /*
- * Browsing the file, ready to do some real work.
+ * When a blocking error occurs, change to this state which blocks input and
+ * force use to acknowledge the error to continue.
+ * TODO: Could be materialize by a popup
  */
 class ErrorState : public State<ErrorState> {
 public:
@@ -149,5 +151,30 @@ private:
   std::string prompt;
   std::string input;
 };
+
+/*
+ * Interactively search an open buffer
+ */
+class SearchState : public State<SearchState>, public OneLinerText {
+public:
+  SearchState(Context &context, Controller &controller, IState *parent_state);
+  void enter(const IEvent &);
+  void exit(const IEvent &);
+  void suspend(const IEvent &) {
+    LOGDBG("suspend SearchState");
+  }
+  void resume(const IEvent &) {
+    LOGDBG("resume SearchState");
+  }
+  virtual void update();
+  void perform_search();
+private:
+  // Model backup of the position of the file when the search was started so we
+  // can go back to it when the search is cancelled.
+  uint m_initial_first_line;
+  // Are we searching forward. If no, it must be backward...
+  bool m_forward_search;
+};
+
 
 #endif //__APPLICATION_STATES_H__

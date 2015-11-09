@@ -258,6 +258,14 @@ void Controller::set_view_size(uint nlines, uint ncolumns) {
   _browser_model.set_view_line_number().update() = nlines;
 }
 
+uint Controller::get_first_line_displayed() {
+  return buffer->get_first_line_displayed();
+}
+
+uint Controller::set_first_line_displayed(uint first_line) {
+  return buffer->set_first_line_displayed(first_line);
+}
+
 void Controller::scroll_buffer_up(uint shift) {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   if (buffer->get_first_line_displayed() >= shift)
@@ -371,3 +379,29 @@ uint Controller::toggle_attributes() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   return buffer->set_display_attributes().update() = !buffer->get_display_attributes();
 }
+
+/*
+ * Searching APIs
+ */
+void Controller::set_search_term(const std::string &term)
+{
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  return buffer->set_search_term().update() = term;
+}
+
+void Controller::set_search_term(const std::string &term) {
+
+}
+
+void Controller::find_search_term() {
+
+}
+
+void Controller::go_to_next_line() {
+
+}
+
+void Controller::stop_search() {
+
+}
+

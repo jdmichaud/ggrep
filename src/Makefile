@@ -14,7 +14,7 @@ RM  = rm -fr
 #
 HOST = $(shell hostname)
 NAME = ggrep
-SRCS = $(wildcard *.cc) $(wildcard curses/*.cc)
+SRCS = $(wildcard *.cc) $(wildcard curses/*.cc) $(wildcard processors/*.cc)
 OBJS = $(SRCS:.cc=.o)
 DPDS = $(SRCS:.cc=.d)
 #

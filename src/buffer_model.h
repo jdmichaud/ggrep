@@ -14,7 +14,7 @@
 #include "types.h"
 #include "model.h"
 #include "buffer.h"
-#include "processor.h"
+#include "processors/processor.h"
 #include "filter_set.h"
 
 /*
@@ -30,6 +30,7 @@ public:
   DECLARE_ENTRY( BufferModel, filter_set, filter_set_t );
   DECLARE_ENTRY( BufferModel, filter_processing_progress, uint );
   DECLARE_ENTRY( BufferModel, display_attributes, bool );
+  DECLARE_ENTRY( BufferModel, search_term, std::string );
 public:
   // Set the current visible buffer
   void set_current_buffer(std::shared_ptr<IBuffer>);

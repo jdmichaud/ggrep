@@ -5,7 +5,7 @@
 #include <tuple>
 #include <utility>
 #include "logmacros.h"
-#include "processor.h"
+#include "processors/filter.h"
 #include "buffer_model.h"
 
 FilterEngine::FilterEngine(BufferModel &buffer_model) :

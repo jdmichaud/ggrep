@@ -5,7 +5,7 @@
 #include "logmacros.h"
 #include "buffer.h"
 #include "buffer_model.h"
-#include "processor.h"
+#include "processors/processor.h"
 
 BufferModel::BufferModel(std::shared_ptr<IBuffer> &&buffer) :
   m_display_attributes(true), m_filter(*this),
@@ -134,6 +134,5 @@ void BufferModel::add_match(char *line, uint filtered_line_index,
   // is set and we don't want the view thread to consider the attribute set when
   // the position are not yet set
   m_current_buffer->get_attrs()[filtered_line_index].attrs_mask = A_REVERSE;
-  LOGDBG("add attr line " << filtered_line_index);
   notify_observers();
 }

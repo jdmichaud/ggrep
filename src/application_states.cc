@@ -94,7 +94,11 @@ OpenState::OpenState(Context &context, Controller &controller,
     {
       { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<ExitCommand>(); } },
       { new Printable('q'),     [this](const IEvent& b) { m_invoker.create_and_execute<ExitCommand>(); } },
-      { new Event(FILE_CLOSED), [this](const IEvent& b) { m_invoker.create_and_execute<FileClosedCommand>(); } }
+      { new Event(FILE_CLOSED), [this](const IEvent& b) { m_invoker.create_and_execute<FileClosedCommand>(); } },
+      { new Printable('/'),     [this](const IEvent& b) { m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::SEARCH_STATE, b);
+                                                          m_invoker.create_and_execute<InjectCommand>(b); } }
+      { new Printable('?'),     [this](const IEvent& b) { m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::SEARCH_STATE, b);
+                                                          m_invoker.create_and_execute<InjectCommand>(b); } }
     }, state_e::OPEN_STATE)
 {}
 
@@ -127,7 +131,7 @@ FilterState::FilterState(Context &context, Controller &controller,
   State(context, controller, parent_state,
     {
       // Ctrl+F = KEY_ACK
-      { new Ctrl(KEY_ACK),      [this](const IEvent& b) { m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::ADD_FILTER_STATE, b); } },
+      { new Ctrl(KEY_ACK),    [this](const IEvent& b) { m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::ADD_FILTER_STATE, b); } },
       { new Ctrl(KEY_ESC),    [this](const IEvent& b) { m_invoker.create_and_execute<ResetFiltering>();
                                                         m_invoker.create_and_execute<BacktrackCommand>(); } },
       // Ctrl + O = KEY_SIN
@@ -209,7 +213,6 @@ void AddFilterState::exit(const IEvent &) {
 }
 
 void AddFilterState::update() {
-  LOGDBG("AddFilterState::update begin");
   m_controller.set_prompt(ADD_FILTER_STATE_PROMPT + m_text);
   pos curpos = m_cur_pos;
   curpos.x += strlen(ADD_FILTER_STATE_PROMPT);
@@ -232,4 +235,67 @@ void ErrorState::enter(const IEvent &e) {
 
 void ErrorState::exit(const IEvent &) {
   LOGDBG("exiting ErrorState")
+}
+
+SearchState::SearchState(Context &context, Controller &controller,
+                       IState *parent_state) :
+  State(context, controller, parent_state,
+    {
+      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>(); } },
+      { new Printable('/'),     [this](const IEvent& b) { (*this).m_forward_search = true;  (*this).perform_search(); } },
+      { new Printable('?'),     [this](const IEvent& b) { (*this).m_forward_search = false; (*this).perform_search(); } },
+      { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>(); } },
+      { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this);
+                                                          m_invoker.create_and_execute<UpdateSearchTerm,
+                                                                                       const std::string &,
+                                                                                       const IEvent &>(m_text, b);
+                                                          (*this).perform_search(); } }
+    }, state_e::SEARCH_STATE), m_forward_search(true)
+{}
+
+void SearchState::enter(const IEvent e&) {
+  LOGDBG("entering SearchState");
+  // Set which way the search will perform
+  if (e == '/') (*this).m_forward_search = true;
+  else (*this).m_forward_search = false; // else must be '?'
+  // Backup the current buffer position
+  (*this).m_initial_first_line = m_controller.get_first_line_displayed();
+  // initialize the text string
+  (*this).clear();
+  // Update the model
+  update();
+}
+
+// TODO: this code is replicated in all OneLiner text
+void SearchState::exit(const IEvent e&) {
+  LOGDBG("exiting SearchState");
+  (*this).clear();
+  m_controller.set_prompt("");
+  pos curpos = m_cur_pos;
+  curpos.x += 0;
+  m_controller.set_prompt_cursor_position(curpos);
+}
+
+void SearchState::resume(const IEvent &e) {
+  LOGDBG("resume SearchState");
+  // Update the model
+  update();
+}
+
+// TODO: this code is replicated in all OneLiner text
+void SearchState::update() {
+  const char *prompt = (*this).m_forward_search ?
+    SEARCH_STATE_PROMPT : RSEARCH_STATE_PROMPT;
+  m_controller.set_prompt(prompt + m_text);
+  pos curpos = m_cur_pos;
+  curpos.x += strlen(prompt);
+  m_controller.set_prompt_cursor_position(curpos);
+}
+
+void SearchState::perform_search()
+{
+  if ((*this).m_forward_search)
+    m_invoker.create_and_execute<ForwardSearchCommand>();
+  else
+    m_invoker.create_and_execute<ReverseSearchCommand>();
 }
