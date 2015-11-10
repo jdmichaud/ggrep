@@ -8,3 +8,5 @@ st->op->cond
 cond(yes)->e
 cond(no)->op
 ```
+
+> Written with [StackEdit](https://stackedit.io/).
