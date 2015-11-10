@@ -241,9 +241,10 @@ SearchState::SearchState(Context &context, Controller &controller,
                        IState *parent_state) :
   State(context, controller, parent_state,
     {
-      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>(); } },
-      { new Printable('/'),     [this](const IEvent& b) { (*this).m_forward_search = true;  (*this).perform_search(); } },
-      { new Printable('?'),     [this](const IEvent& b) { (*this).m_forward_search = false; (*this).perform_search(); } },
+      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { (*this).clear();
+                                                          m_invoker.create_and_execute<BacktrackCommand>(); } },
+      { new Printable('/'),     [this](const IEvent& b) { ; } },
+      { new Printable('?'),     [this](const IEvent& b) { ; } },
       { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>(); } },
       { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this);
                                                           m_invoker.create_and_execute<UpdateSearchTerm,
@@ -260,8 +261,6 @@ void SearchState::enter(const IEvent e&) {
   else (*this).m_forward_search = false; // else must be '?'
   // Backup the current buffer position
   (*this).m_initial_first_line = m_controller.get_first_line_displayed();
-  // initialize the text string
-  (*this).clear();
   // Update the model
   update();
 }

@@ -238,8 +238,9 @@ private:
   pos m_previous_curpos;
 };
 
-
-
+/*
+ * Toggle the display of attributes
+ */
 class ToggleAttributesCommand : public Command {
 public:
   ToggleAttributesCommand(Controller &controller, Invoker &invoker,
