@@ -33,7 +33,7 @@ public:
     Command(controller, invoker, state) {}
 
   virtual void execute() {
-    m_controller.search_forward();
+    m_controller.go_to_next_found_item();
   }
   virtual void unexecute() { /* non undoable */ }
   virtual bool unexecutable() { return false; };
@@ -45,7 +45,7 @@ public:
     Command(controller, invoker, state) {}
 
   virtual void execute() {
-    m_controller.search_backward();
+    m_controller.go_to_previous_found_item();
   }
   virtual void unexecute() { /* non undoable */ }
   virtual bool unexecutable() { return false; };

@@ -30,6 +30,9 @@ Context::Context(Controller &controller) {
   m_states.emplace(state_e::ADD_FILTER_STATE,
                    new AddFilterState(*this, controller,
                                       m_states[state_e::OPEN_STATE]));
+  m_states.emplace(state_e::SEARCH_STATE,
+                   new SearchState(*this, controller,
+                                   m_states[state_e::BROWSE_STATE]));
   // Starting point of the state machine
   m_state = m_states[state_e::CLOSE_STATE];
   m_state->enter(Event(APP_STARTED));

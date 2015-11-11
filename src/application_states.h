@@ -163,9 +163,7 @@ public:
   void suspend(const IEvent &) {
     LOGDBG("suspend SearchState");
   }
-  void resume(const IEvent &) {
-    LOGDBG("resume SearchState");
-  }
+  void resume(const IEvent &);
   virtual void update();
   void perform_search();
 private:

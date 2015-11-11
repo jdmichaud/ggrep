@@ -8,8 +8,10 @@
 #include "processors/processor.h"
 
 BufferModel::BufferModel(std::shared_ptr<IBuffer> &&buffer) :
-  m_display_attributes(true), m_filter(*this),
-  m_file_buffer(std::dynamic_pointer_cast<FileBuffer>(buffer))
+  m_filter_attributes(nullptr),
+  m_display_attributes(false),
+  m_file_buffer(std::dynamic_pointer_cast<FileBuffer>(buffer)),
+  m_filter(*this)
 {
   LOGDBG("BufferModel creator " << this);
   // Set the current buffer as the file buffer
@@ -56,12 +58,11 @@ void BufferModel::set_first_line_displayed(uint i) {
 }
 
 attr_list_t BufferModel::get_attrs() {
-  return m_current_buffer->get_attrs();
+  return m_filter_attributes->get_attrs();
 }
 
 void BufferModel::clear_attrs() {
-  m_current_buffer->clear_attrs();
-  notify_observers();
+  set_filter_attributes().update()->clear_attrs();
 }
 
 void BufferModel::clear_filtered_line() {
@@ -76,7 +77,9 @@ void BufferModel::add_filtered_line(char *line) {
 void BufferModel::enable_filtering() {
   LOGDBG("switch buffer to filtered view");
   m_current_buffer = m_filtered_buffer;
-  notify_observers();
+  // Set the attributes to the model.
+  (*this).set_filter_attributes().update() = &m_filter; // TODO: Composition!!!
+  //notify_observers();
 }
 
 void BufferModel::disable_filtering() {
@@ -127,12 +130,10 @@ void BufferModel::remove_last_filter() {
 void BufferModel::add_match(char *line, uint filtered_line_index,
                             uint start_pos, uint end_pos) {
   (*this).add_filtered_line(line);
-  // Add the matching information as attributes
-  m_current_buffer->get_attrs()[filtered_line_index].start_pos = start_pos;
-  m_current_buffer->get_attrs()[filtered_line_index].end_pos = end_pos;
-  // Set the attribute at the end as it is the key to determine if an attribute
-  // is set and we don't want the view thread to consider the attribute set when
-  // the position are not yet set
-  m_current_buffer->get_attrs()[filtered_line_index].attrs_mask = A_REVERSE;
-  notify_observers();
+  Update<pAttributeHolder> attributes = set_filter_attributes();
+  if (attributes.update() != nullptr) {
+    attributes.update()->add_attr(filtered_line_index, start_pos, end_pos, A_REVERSE);
+  }
+  // The attr update triggers a view refresh...
+  //notify_observers();
 }

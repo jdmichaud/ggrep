@@ -8,6 +8,7 @@
 #include "commands/misc.h"
 #include "commands/state_cmd.h"
 #include "commands/filtering.h"
+#include "commands/searching.h"
 
 DefaultState::DefaultState(Context &context, Controller &controller,
                            IState *parent_state) :
@@ -96,9 +97,9 @@ OpenState::OpenState(Context &context, Controller &controller,
       { new Printable('q'),     [this](const IEvent& b) { m_invoker.create_and_execute<ExitCommand>(); } },
       { new Event(FILE_CLOSED), [this](const IEvent& b) { m_invoker.create_and_execute<FileClosedCommand>(); } },
       { new Printable('/'),     [this](const IEvent& b) { m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::SEARCH_STATE, b);
-                                                          m_invoker.create_and_execute<InjectCommand>(b); } }
+                                                          m_invoker.create_and_execute<InjectCommand>('/'); } },
       { new Printable('?'),     [this](const IEvent& b) { m_invoker.create_and_execute<EnterStateCommand, state_e, const IEvent &>(state_e::SEARCH_STATE, b);
-                                                          m_invoker.create_and_execute<InjectCommand>(b); } }
+                                                          m_invoker.create_and_execute<InjectCommand>('?'); } }
     }, state_e::OPEN_STATE)
 {}
 
@@ -191,10 +192,10 @@ void AddFilterState::enter(const IEvent &e) {
   LOGDBG("entering AddFilterState");
   // initialize the text string
   (*this).clear();
-  // Update the model
-  update();
   // Create the current filter entry in the filter set of the FilteringProcessor
   m_invoker.create_and_execute<CreateCurrentFilterEntry>();
+  // Update the model
+  update();
 }
 
 void AddFilterState::resume(const IEvent &e) {
@@ -248,13 +249,12 @@ SearchState::SearchState(Context &context, Controller &controller,
       { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>(); } },
       { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this);
                                                           m_invoker.create_and_execute<UpdateSearchTerm,
-                                                                                       const std::string &,
-                                                                                       const IEvent &>(m_text, b);
+                                                                                       const std::string &>(m_text);
                                                           (*this).perform_search(); } }
     }, state_e::SEARCH_STATE), m_forward_search(true)
 {}
 
-void SearchState::enter(const IEvent e&) {
+void SearchState::enter(const IEvent &e) {
   LOGDBG("entering SearchState");
   // Set which way the search will perform
   if (e == '/') (*this).m_forward_search = true;
@@ -266,7 +266,7 @@ void SearchState::enter(const IEvent e&) {
 }
 
 // TODO: this code is replicated in all OneLiner text
-void SearchState::exit(const IEvent e&) {
+void SearchState::exit(const IEvent &e) {
   LOGDBG("exiting SearchState");
   (*this).clear();
   m_controller.set_prompt("");

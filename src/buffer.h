@@ -23,24 +23,6 @@
 #define LINE_STATIC_SIZE 256
 
 /*
- * This structure describes the text attributes to apply to a certain contiguous
- * text zone
- */
-struct tattr_t {
-  int attrs_mask;
-  uint start_pos;
-  uint end_pos;
-
-  tattr_t() : attrs_mask(0), start_pos(0), end_pos(0) {}
-  tattr_t(int am, uint sp, uint ep) : attrs_mask(am), start_pos(sp), end_pos(ep) {}
-};
-
-/*
- * An array of array
- */
-typedef tattr_t *attr_list_t;
-
-/*
  * Custom exception raised when an error occurs on opening a file
  */
 class OpenFileException : public std::exception {
@@ -84,11 +66,6 @@ public:
   virtual uint get_number_of_line() const = 0;
   virtual void set_number_of_line(uint) = 0;
   /*!
-   * Get/Set attributes of the buffer
-   */
-  virtual attr_list_t get_attrs() = 0;
-  virtual void clear_attrs() = 0;
-  /*!
    * Get/Set the current pointer (first line displayed) of the buffer
    */
   virtual uint get_first_line_displayed() const = 0;
@@ -98,11 +75,8 @@ public:
 class Buffer : public IBuffer {
 public:
   Buffer() : m_first_line_displayed(0) {  }
-  virtual attr_list_t get_attrs() { return m_attrs; }
   virtual uint get_first_line_displayed() const { return m_first_line_displayed; }
   virtual void set_first_line_displayed(uint i) { m_first_line_displayed = i; }
-protected:
-  attr_list_t m_attrs;
 private:
   uint m_first_line_displayed;
 };
@@ -119,25 +93,22 @@ public:
     if (!m_file.is_open()) throw OpenFileException(m_filepath);
     // Allocate the buffer
     m_nb_lines = get_number_of_line();
-    // Null terimated string of pointers to char *
+    // Null terminated string of pointers to char *
     m_buffer = new char*[m_nb_lines + 1];
     memset(m_buffer, 0, (m_nb_lines + 1) * sizeof (char*));
     m_buffer[m_nb_lines] = 0;
     // Load the whole file
     (*this).load({0, -1});
-    // Initialize attrs array
-    m_attrs = new tattr_t[m_nb_lines + 1];
-    (*this).clear_attrs();
+    // No need to keep the file open
+    m_file.close();
     LOGINF("FileBuffer loaded (" << this << ")");
   }
 
   ~FileBuffer() {
     LOGDBG("FileBuffer destructor " << this);
-    m_file.close();
     for (uint i = 0; i < m_nb_lines; ++i)
       if (m_buffer[i]) delete m_buffer[i];
     delete[] m_buffer;
-    delete[] m_attrs;
   }
 
   /*
@@ -146,13 +117,6 @@ public:
   char** get_text() const {
     LOGDBG("get_text");
     return m_buffer;
-  }
-
-  /*
-   * Reset the attributes array
-   */
-  virtual void clear_attrs() {
-    memset(m_attrs, 0, (m_nb_lines + 1) * sizeof (tattr_t));
   }
 
   /*

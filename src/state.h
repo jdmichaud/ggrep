@@ -27,7 +27,8 @@ enum class state_e {
   BROWSE_STATE,
   ERROR_STATE,
   FILTER_STATE,
-  ADD_FILTER_STATE
+  ADD_FILTER_STATE,
+  SEARCH_STATE
 };
 
 /*

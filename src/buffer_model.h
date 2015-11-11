@@ -15,6 +15,8 @@
 #include "model.h"
 #include "buffer.h"
 #include "processors/processor.h"
+#include "processors/attrs.h"
+#include "processors/filter.h"
 #include "filter_set.h"
 
 /*
@@ -29,8 +31,10 @@ public:
 
   DECLARE_ENTRY( BufferModel, filter_set, filter_set_t );
   DECLARE_ENTRY( BufferModel, filter_processing_progress, uint );
+  DECLARE_ENTRY( BufferModel, filter_attributes, pAttributeHolder );
   DECLARE_ENTRY( BufferModel, display_attributes, bool );
   DECLARE_ENTRY( BufferModel, search_term, std::string );
+  DECLARE_ENTRY( BufferModel, search_forward, bool );
 public:
   // Set the current visible buffer
   void set_current_buffer(std::shared_ptr<IBuffer>);
@@ -47,9 +51,6 @@ public:
   attr_list_t get_attrs();
   void clear_attrs();
 public:
-  // Should we have the thread object in the model ? Looks ugly but I don't see
-  // another easy and straighforward way... TODO: Improve this
-  FilterEngine m_filter;
   /*
    * Functions used by the FilterProcessor
    */
@@ -73,6 +74,10 @@ private:
   std::shared_ptr<FilteredBuffer> m_filtered_buffer;
   std::shared_ptr<IBuffer> m_current_buffer;
   std::mutex m_filter_set_mutex;
+public:
+  // Should we have the thread object in the model ? Looks ugly but I don't see
+  // another easy and straighforward way... TODO: Improve this
+  FilterEngine m_filter;
 };
 
 typedef std::list<std::unique_ptr<BufferModel> > buffer_list;

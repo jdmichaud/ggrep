@@ -35,9 +35,11 @@ public:
 
   virtual void execute() {
     m_controller.enable_filtering_on_current_buffer();
+    m_controller.set_attributes();
   }
   virtual void unexecute() {
     m_controller.disable_filtering_on_current_buffer();
+    m_controller.unset_attributes();
   }
   virtual bool unexecutable() { return true; };
 };
@@ -53,9 +55,11 @@ public:
 
   virtual void execute() {
     m_controller.disable_filtering_on_current_buffer();
+    m_controller.unset_attributes();
   }
   virtual void unexecute() {
     m_controller.enable_filtering_on_current_buffer();
+    m_controller.set_attributes();
   }
   virtual bool unexecutable() { return true; };
 };

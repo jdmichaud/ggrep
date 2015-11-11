@@ -10,10 +10,14 @@
 
 FilterEngine::FilterEngine(BufferModel &buffer_model) :
   ProcessorThread(std::bind(&FilterEngine::filter, this)),
+  AttributeHolder(buffer_model.get_file_buffer()->get_number_of_line()),
   m_buffer_model(buffer_model)
 {
   // Initialize the filter list
   m_buffer_model.retrieve_filter_set(m_filter_set);
+}
+
+FilterEngine::~FilterEngine() {
 }
 
 /*
@@ -111,7 +115,9 @@ void FilterEngine::rearm(uint &current_buffer_line,
                          uint &current_filtered_line) {
   (*this).reset_signal(); // reset it to false
   // Clear the attributes first
-  m_buffer_model.clear_attrs();
+  (*this).clear_attrs();
+  // Set the attributes to the model.
+  m_buffer_model.set_filter_attributes().update() = this;
   // Clear the model buffer
   LOGDBG_("clear filtered lined");
   m_buffer_model.clear_filtered_line();
@@ -129,9 +135,6 @@ FilteredBuffer::FilteredBuffer(std::shared_ptr<IBuffer> &buffer) {
   m_filtered_lines = new char*[m_original_number_of_line];
   memset(m_filtered_lines, 0, m_original_number_of_line * sizeof (char));
   number_of_filtered_line = 0;
-  // Initialize attrs array
-  m_attrs = new tattr_t[m_original_number_of_line * sizeof (tattr_t)];
-  (*this).clear_attrs();
 }
 
 FilteredBuffer::~FilteredBuffer() {
@@ -140,10 +143,6 @@ FilteredBuffer::~FilteredBuffer() {
 
 char **FilteredBuffer::get_text() const {
   return m_filtered_lines;
-}
-
-void FilteredBuffer::clear_attrs() {
-  memset(m_attrs, 0, (m_original_number_of_line + 1) * sizeof (tattr_t));
 }
 
 uint FilteredBuffer::get_original_number_of_line() const {
@@ -171,3 +170,4 @@ void FilteredBuffer::add_line(char *line) {
   }
   m_filtered_lines[number_of_filtered_line++] = line;
 }
+

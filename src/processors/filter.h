@@ -8,6 +8,8 @@
 #include "logmacros.h"
 #include "filter_set.h"
 #include "buffer.h"
+#include "processors/attrs.h"
+#include "processors/processor.h"
 
 #ifndef __FILTER_H__
 #define __FILTER_H__
@@ -37,8 +39,6 @@ public:
    */
   /** Clear the filtered line buffer */
   void clear();
-  /** Clear the attributes */
-  virtual void clear_attrs();
   /** Add a line to the filtered line buffer */
   void add_line(char *line);
 private:
@@ -47,9 +47,11 @@ private:
   uint m_original_number_of_line;
 };
 
-class FilterEngine : public ProcessorThread {
+// TODO: AttributeHolder should be a composition not an inheritance
+class FilterEngine : public ProcessorThread, public AttributeHolder {
 public:
   FilterEngine(BufferModel &buffer_model);
+  ~FilterEngine();
   /*
    * Start once the signal is raised (or on first call to start).
    * Check the content of the filter set. If the filter set is empty, wait for a
@@ -69,7 +71,6 @@ private:
              std::cmatch &matches);
 
 private:
-  //Controller  &m_controller;
   BufferModel &m_buffer_model;
   // We maintain a local filter list in order to avoid taking a mutex for each
   // line analyzed.

@@ -259,11 +259,13 @@ void Controller::set_view_size(uint nlines, uint ncolumns) {
 }
 
 uint Controller::get_first_line_displayed() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
   return buffer->get_first_line_displayed();
 }
 
-uint Controller::set_first_line_displayed(uint first_line) {
-  return buffer->set_first_line_displayed(first_line);
+void Controller::set_first_line_displayed(uint first_line) {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->set_first_line_displayed(first_line);
 }
 
 void Controller::scroll_buffer_up(uint shift) {
@@ -375,9 +377,18 @@ uint Controller::get_number_of_filter_on_current_buffer() {
   return buffer->get_filter_set().filters.size();
 }
 
-uint Controller::toggle_attributes() {
+void Controller::set_attributes() {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
-  return buffer->set_display_attributes().update() = !buffer->get_display_attributes();
+  buffer->set_display_attributes().update() = true;
+}
+void Controller::unset_attributes() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->set_display_attributes().update() = false;
+}
+
+void Controller::toggle_attributes() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->set_display_attributes().update() = !buffer->get_display_attributes();
 }
 
 /*
@@ -386,22 +397,27 @@ uint Controller::toggle_attributes() {
 void Controller::set_search_term(const std::string &term)
 {
   const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
-  return buffer->set_search_term().update() = term;
+  buffer->set_search_term().update() = term;
 }
 
-void Controller::set_search_term(const std::string &term) {
-
+void Controller::set_search_direction(bool forward) {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->set_search_forward().update() = forward;
 }
 
 void Controller::find_search_term() {
 
 }
 
-void Controller::go_to_next_line() {
+void Controller::stop_search() {
 
 }
 
-void Controller::stop_search() {
+void Controller::go_to_next_found_item() {
+
+}
+
+void Controller::go_to_previous_found_item() {
 
 }
 

@@ -156,6 +156,7 @@ void TerminalView::redraw_prompt(PromptModel &prompt_model) {
     (*_browser_model.get_current_buffer());
   if (_state_model.get_state() == state_e::OPENING_STATE
       || _state_model.get_state() == state_e::ADD_FILTER_STATE
+      || _state_model.get_state() == state_e::SEARCH_STATE
       || _state_model.get_state() == state_e::ERROR_STATE) {
     // compute where to start the prompt string
     _prompt_string_index =
@@ -213,6 +214,7 @@ void TerminalView::redraw_cursor(StateModel &state_model) {
    * Display the curso when a state prompt is expecting an input
    */
   if (state_model.get_state() == state_e::OPENING_STATE
+      || state_model.get_state() == state_e::SEARCH_STATE
       || state_model.get_state() == state_e::ADD_FILTER_STATE) {
     curs_set(1);
     LOGDBG_("_prompt_model.get_cursor_position().x: " << _prompt_model.get_cursor_position().x);

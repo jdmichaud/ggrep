@@ -241,6 +241,35 @@ private:
 /*
  * Toggle the display of attributes
  */
+class SetToggleAttributesCommand : public Command {
+public:
+  SetToggleAttributesCommand(Controller &controller, Invoker &invoker,
+                             IState *state) :
+    Command(controller, invoker, state) {}
+
+  virtual void execute() {
+    m_controller.set_attributes();
+  }
+  virtual void unexecute() {
+    m_controller.unset_attributes();
+  }
+private:
+};
+
+class UnsetToggleAttributesCommand : public Command {
+public:
+  UnsetToggleAttributesCommand(Controller &controller, Invoker &invoker,
+                               IState *state) :
+    Command(controller, invoker, state) {}
+  virtual void execute() {
+    m_controller.unset_attributes();
+  }
+  virtual void unexecute() {
+    m_controller.set_attributes();
+  }
+private:
+};
+
 class ToggleAttributesCommand : public Command {
 public:
   ToggleAttributesCommand(Controller &controller, Invoker &invoker,
