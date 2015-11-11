@@ -19,7 +19,7 @@ OBJS = $(SRCS:.cc=.o)
 DPDS = $(SRCS:.cc=.d)
 #
 UNAME_S := $(shell uname -s)
-CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -stdlib=libc++ -Wfatal-errors -Wno-unused-parameter -Wno-potentially-evaluated-expression -DS_LOGERR
+CFLAGS = -Wall -Wextra -Wshadow -std=c++11 -stdlib=libc++ -Wfatal-errors -Wno-unused-parameter -Wno-potentially-evaluated-expression -Wno-unknown-warning-option -DS_LOGERR 
 OPTFLGS= -O3 -Os
 IPATH  = -I../ -I../src -I../../loglite
 LPATH  =
