@@ -17,9 +17,6 @@ FilterEngine::FilterEngine(BufferModel &buffer_model) :
   m_buffer_model.retrieve_filter_set(m_filter_set);
 }
 
-FilterEngine::~FilterEngine() {
-}
-
 /*
  * Match a line of text versus a set of provided filters
  */

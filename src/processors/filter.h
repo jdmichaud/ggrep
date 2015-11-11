@@ -47,11 +47,10 @@ private:
   uint m_original_number_of_line;
 };
 
-// TODO: AttributeHolder should be a composition not an inheritance
+// TODO: AttributeHolder should be a composition not an inheritance!
 class FilterEngine : public ProcessorThread, public AttributeHolder {
 public:
   FilterEngine(BufferModel &buffer_model);
-  ~FilterEngine();
   /*
    * Start once the signal is raised (or on first call to start).
    * Check the content of the filter set. If the filter set is empty, wait for a

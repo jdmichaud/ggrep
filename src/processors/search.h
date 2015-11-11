@@ -6,10 +6,16 @@
 #ifndef __SEARCH_H__
 #define __SEARCH_H__
 
-// Forward declaration
-class BufferModel;
+#include "buffer_model.h"
 
-class SearchEngine : public ProcessorThread {
+struct found_item {
+  uint line;
+  uint start_pos;
+  uint end_pos;
+};
+
+// TODO: AttributeHolder should be a composition not an inheritance!
+class SearchEngine : public ProcessorThread, public AttributeHolder {
 public:
   SearchEngine(BufferModel &buffer_model);
   /*
@@ -40,15 +46,20 @@ private:
   /*
    * Match a character string from the buffer with a particular filter set.
    */
-  bool match(const char *line, const filter_set_t &filter_set,
+  bool match(const char *line, const std::string term,
              std::cmatch &matches);
 
 private:
   //Controller  &m_controller;
   BufferModel &m_buffer_model;
-  // We maintain a local filter list in order to avoid taking a mutex for each
-  // line analyzed.
-  filter_set_t m_filter_set;
+  // lower indexed line searched
+  uint m_low_boundary;
+  // higher indexed line searched
+  uint m_high_boundary;
+  // found items
+  std::list<found_item> m_found_items;
+  // Currently focused item
+  std::list<found_item>::iterator m_focused_item;
 };
 
 #endif // __SEARCH_H__
