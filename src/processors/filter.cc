@@ -4,6 +4,7 @@
 #include <regex>
 #include <tuple>
 #include <utility>
+#include <cstring>
 #include "logmacros.h"
 #include "processors/filter.h"
 #include "buffer_model.h"
@@ -22,7 +23,8 @@ FilterEngine::FilterEngine(BufferModel &buffer_model) :
  */
 bool FilterEngine::match(const char *line,
                          const filter_set_t &filter_set,
-                         std::cmatch &matches) {
+                         uint &position, uint &length) {
+  std::cmatch matches;
   bool match = false;
   if (filter_set.land) {
     // If we want to AND the results
@@ -36,8 +38,16 @@ bool FilterEngine::match(const char *line,
     for (const auto &re: filter_set.filters) {
       // If just one regex does match, exit
       if ((match = std::regex_search(line, matches, re.second)))
+      {
+        position = matches.position();
+        length = matches.length();
         return true;
+      }
     }
+  }
+  if (match) {
+    position = matches.position();
+    length = matches.length();
   }
   return match;
 }
@@ -64,7 +74,7 @@ void FilterEngine::filter() {
   // Reset the signal set on the first start
   (*this).reset_signal(); // reset it to false
   // Will hold the result of the match which will be converted to attributes
-  std::cmatch matches;
+  uint position; uint length;
   // As long as we are not interrupted
   while (!m_interrupted) {
     // If no filter has been set or we are done with our analysis then we wait.
@@ -72,9 +82,9 @@ void FilterEngine::filter() {
             current_buffer_line >= number_of_line_in_file)
            && !m_interrupted) // if we are interrupted, we stop waiting
     {
-      LOGDBG_("filtering paused");
+      LOGDBG("filtering paused");
       (*this).wait(); // Wait until someone signals us
-      LOGDBG_("filtering started, signal: " << m_signaled);
+      LOGDBG("filtering started, signal: " << m_signaled);
       // Have we been interrupted ?
       if (m_interrupted) return;
       // This instruction might seem strange but we need to get out of the loop
@@ -88,13 +98,12 @@ void FilterEngine::filter() {
     // Have we been interrupted ?
     if (m_interrupted) return;
     // Does the current line match the filter set
-    if (match(file_text[current_buffer_line], m_filter_set, matches)) {
+    if (match(file_text[current_buffer_line], m_filter_set, position, length)) {
       // Yes, add it to the model
       LOGDBG_("line " << current_buffer_line << " matches");
       m_buffer_model.add_match(file_text[current_buffer_line],
                                current_filtered_line,
-                               matches.position(),
-                               matches.position() + matches.length());
+                               position, position + length);
       ++current_filtered_line;
     }
     // Look at the next line

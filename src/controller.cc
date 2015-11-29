@@ -406,7 +406,13 @@ void Controller::set_search_direction(bool forward) {
 }
 
 void Controller::find_search_term() {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->m_search.signal();
+}
 
+void Controller::set_search_focus_line(uint line_index) {
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  buffer->set_search_focus_line().update() = line_index;
 }
 
 void Controller::stop_search() {
@@ -414,10 +420,27 @@ void Controller::stop_search() {
 }
 
 void Controller::go_to_next_found_item() {
-
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  LOCK_MODEL( (*buffer) )
+  // Is there next item ?
+  if (buffer->get_focused_item() == buffer->get_found_items().end())
+    // No next item, do nothing (TODO: display warning)
+    return ;
+  // Move the focused item to the next found item
+  ++(buffer->set_focused_item().update());
+  // Update the first line displayed
+  buffer->set_first_line_displayed((buffer->get_focused_item())->line);
 }
 
 void Controller::go_to_previous_found_item() {
-
+  const std::unique_ptr<BufferModel> &buffer = (*_browser_model.get_current_buffer());
+  LOCK_MODEL( (*buffer) )
+  // Is there next item ?
+  if (buffer->get_focused_item() == buffer->get_found_items().begin())
+    // No next item, do nothing (TODO: display warning)
+    return ;
+  // Move the focused item to the next found item
+  --(buffer->set_focused_item().update());
+  // Update the first line displayed
+  buffer->set_first_line_displayed((buffer->get_focused_item())->line);
 }
-

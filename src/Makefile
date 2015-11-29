@@ -26,7 +26,7 @@ LPATH  =
 LIB    = -lpthread -lstdc++ -lncursesw -stdlib=libc++
 DBGLIBS=
 #
-.PHONY = all dbg clean fclean
+.PHONY = all dbg clean fclean re red
 #
 all: $(OBJS)
 	$(CC) $(IPATH) $(LPATH) $(OBJS) -o $(NAME) $(LIB) $(DBGLIBS)
@@ -40,7 +40,7 @@ dbg: OPTFLGS=
 dbg: all
 #
 clean: fclean
-	$(RM) *o curses/*o *c~ *cc~ *hpp~ *~ Makefile~ \#* *.d
+	$(RM) *.o curses/*.o processors/*.o *.c~ *.cc~ *hpp~ *~ Makefile~ \#* *.d curses/*.d processors/*.d
 #
 fclean:
 	$(RM) $(NAME)
@@ -51,7 +51,7 @@ red : clean dbg
 #
 depend: $(DPDS)
 %.d : %.cc
-	rm -fr $@
+	$(RM) $@
 	$(CC) $(CFLAGS) $(IPATH) -MM $< -MF $@
 #
-include $(DPDS)
+-include $(DPDS)

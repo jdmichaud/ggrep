@@ -17,6 +17,7 @@
 #include "processors/processor.h"
 #include "processors/attrs.h"
 #include "processors/filter.h"
+#include "processors/search.h"
 #include "filter_set.h"
 
 /*
@@ -35,6 +36,11 @@ public:
   DECLARE_ENTRY( BufferModel, display_attributes, bool );
   DECLARE_ENTRY( BufferModel, search_term, std::string );
   DECLARE_ENTRY( BufferModel, search_forward, bool );
+  DECLARE_ENTRY( BufferModel, search_focus_line, uint );
+  DECLARE_ENTRY( BufferModel, found_items, std::list<found_item_t> );
+  DECLARE_ENTRY( BufferModel, focused_item, std::list<found_item_t>::iterator );
+  DECLARE_ENTRY( BufferModel, search_attributes, pAttributeHolder );
+
 public:
   // Set the current visible buffer
   void set_current_buffer(std::shared_ptr<IBuffer>);
@@ -78,6 +84,7 @@ public:
   // Should we have the thread object in the model ? Looks ugly but I don't see
   // another easy and straighforward way... TODO: Improve this
   FilterEngine m_filter;
+  SearchEngine m_search;
 };
 
 typedef std::list<std::unique_ptr<BufferModel> > buffer_list;

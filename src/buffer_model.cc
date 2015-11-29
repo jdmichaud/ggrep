@@ -10,8 +10,10 @@
 BufferModel::BufferModel(std::shared_ptr<IBuffer> &&buffer) :
   m_filter_attributes(nullptr),
   m_display_attributes(false),
+  m_search_attributes(nullptr),
   m_file_buffer(std::dynamic_pointer_cast<FileBuffer>(buffer)),
-  m_filter(*this)
+  m_filter(*this),
+  m_search(*this)
 {
   LOGDBG("BufferModel creator " << this);
   // Set the current buffer as the file buffer
@@ -24,6 +26,11 @@ BufferModel::BufferModel(std::shared_ptr<IBuffer> &&buffer) :
   m_filtered_buffer = std::make_shared<FilteredBuffer>(buffer);
   // Should be started elsewhere. In the controller ?
   m_filter.start();
+  m_search.start();
+  // Set the search attribute holder as the SearchEngine object
+  m_search_attributes = &m_search;
+  // Set the focused item iterator at the end of the found item list
+  m_focused_item = m_found_items.end();
 }
 
 BufferModel::~BufferModel() {

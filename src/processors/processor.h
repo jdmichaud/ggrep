@@ -56,7 +56,7 @@ public:
       m_thread.join();
     }
   }
-  void stop() { m_interrupted = true; signal(); }
+  void stop() { LOGDBG("stopped"); m_interrupted = true; m_signal.notify_all(); }
   void signal() { LOGDBG("signaled"); m_signaled = true; m_signal.notify_all(); }
   inline void reset_signal() { m_signaled = false; }
   /*
@@ -68,7 +68,10 @@ public:
    */
   void wait() {
     std::unique_lock<std::mutex> lock(m_wait_mutex);
-    m_signal.wait(lock);
+    // We use a predicate to avoid spurious wakeup and greatly simplify client 
+    // code. We return _only_ on signal or interruption.
+    m_signal.wait(lock, 
+                  [this]() { return (*this).m_signaled || (*this).m_interrupted; });
   }
 protected:
   bool                      m_interrupted;

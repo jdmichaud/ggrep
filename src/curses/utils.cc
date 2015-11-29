@@ -93,12 +93,12 @@ void print_attrs(WINDOW *w, attr_list_t attr_list, char * const *buffer,
   uint screen_line = 1; // TODO: don't assume one line header!
   // loop over the range
   for (int i : r) {
-    LOGDBG_("print_attrs line: " << i);
+    LOGDBG("print_attrs line: " << i);
     // Check if an attribute is set
     if (!attr_list[i].attrs_mask) continue;
     // If the string is supposed to start after the end_pos, bail
     if (first_column > attr_list[i].end_pos) continue;
-    LOGDBG_("line " << i << " has attributes");
+    LOGDBG("line " << i << " has attributes");
     // Where to start on the screen
     uint screen_offset = std::max((int) attr_list[i].start_pos - (int) first_column,
                                   0)
@@ -109,12 +109,12 @@ void print_attrs(WINDOW *w, attr_list_t attr_list, char * const *buffer,
     // set the attributes
     wattr_set(w, attr_list[i].attrs_mask, bkp_pair, bkp_opts);
     // print the attributes string
-    LOGDBG_("i: " << i);
-    LOGDBG_("screen_line: " << screen_line);
-    LOGDBG_("attr_list[i].end_pos: " << attr_list[i].end_pos);
-    LOGDBG_("string_offset: " << string_offset);
-    LOGDBG_("attr_list[i].end_pos - string_offset: " << (attr_list[i].end_pos - string_offset));
-    LOGDBG_("buffer[i] size: " << strlen(buffer[i]));
+    LOGDBG("i: " << i);
+    LOGDBG("screen_line: " << screen_line);
+    LOGDBG("attr_list[i].end_pos: " << attr_list[i].end_pos);
+    LOGDBG("string_offset: " << string_offset);
+    LOGDBG("attr_list[i].end_pos - string_offset: " << (attr_list[i].end_pos - string_offset));
+    LOGDBG("buffer[i] size: " << strlen(buffer[i]));
     mvwaddnstr(w, screen_line, screen_offset, &buffer[i][string_offset],
                attr_list[i].end_pos - string_offset);
     // Move to next line in read buffer

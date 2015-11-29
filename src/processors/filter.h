@@ -67,7 +67,7 @@ private:
    * Match a character string from the buffer with a particular filter set.
    */
   bool match(const char *line, const filter_set_t &filter_set,
-             std::cmatch &matches);
+             uint &position, uint &length);
 
 private:
   BufferModel &m_buffer_model;

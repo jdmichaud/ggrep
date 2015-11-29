@@ -31,6 +31,7 @@
 #define REDRAW_BUFFER       LOWER_BOUND_EVENT + 14
 #define REDRAW_BROWSER      LOWER_BOUND_EVENT + 15
 #define REDRAW_STATE        LOWER_BOUND_EVENT + 16
+#define NEW_FOUND_ITEM      LOWER_BOUND_EVENT + 17
 
 #ifndef __EVENT_H__
 #define __EVENT_H__

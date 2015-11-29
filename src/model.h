@@ -8,6 +8,7 @@
 #define __MODEL_H__
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <functional>
 
@@ -24,18 +25,23 @@ typedef std::function<void()> notify_callback_t;
 public: \
   const __VA_ARGS__ & get_##NAME() const { \
     return m_##NAME;  \
-  }  \
+  } \
   void set_##NAME ( __VA_ARGS__ && value) { \
-    m_##NAME = std::move(value);  \
-    (*this).notify_observers();  \
-  }  \
+    m_##NAME = std::move(value); \
+    (*this).notify_observers(); \
+  } \
   Update<__VA_ARGS__> set_##NAME () { \
-    notify_callback_t f = std::bind(&MODEL_CLASS::notify_observers, \
-                                    this); \
+    notify_callback_t f = std::bind(&MODEL_CLASS::notify_observers, this); \
     return Update<__VA_ARGS__>( m_##NAME , f ); \
-  }  \
-private:  \
-  __VA_ARGS__ m_##NAME;
+  } \
+private: \
+  __VA_ARGS__ m_##NAME; \
+
+/* 
+ * Used when accessing complex members that are not thread safe (like STL
+ * container). The lock is for the whole model so use only when necessary.
+ */
+#define LOCK_MODEL(OBJECT) std::lock_guard<std::mutex> lock(OBJECT.m_mutex);
 
 /*! Update is a Proxy object that calls notify_observers on destruction
  * Can also be used to simulate transation like so:
@@ -44,7 +50,7 @@ private:  \
  *  update().push_back(4);
  *  update().push_back(5);
  *  update().push_back(6);
- * }
+ * } // Observer notified once on 'update' variable desctruction
  */
 template <typename T>
 class Update {
@@ -75,6 +81,9 @@ private:
 };
 
 class Model : public Observable {
+public:
+  // Used for object wide locking. Use with care...
+  std::mutex m_mutex;
 };
 
 #endif //__MODEL_H__

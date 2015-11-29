@@ -98,11 +98,12 @@ void TerminalView::redraw_all() {
 }
 
 void TerminalView::redraw_buffer(BufferModel &buffer_model) {
-  LOGDBG_("TerminalView::redraw_buffer called");
+  LOGDBG("TerminalView::redraw_buffer called");
   if (_state_model.get_state() == state_e::OPEN_STATE
       || _state_model.get_state() == state_e::BROWSE_STATE
       || _state_model.get_state() == state_e::FILTER_STATE
-      || _state_model.get_state() == state_e::ADD_FILTER_STATE)
+      || _state_model.get_state() == state_e::ADD_FILTER_STATE
+      || _state_model.get_state() == state_e::SEARCH_STATE)
   {
     uint first_line = buffer_model.get_first_line_displayed();
     uint number_of_line = buffer_model.get_number_of_line();
@@ -111,12 +112,33 @@ void TerminalView::redraw_buffer(BufferModel &buffer_model) {
     print_buffer(stdscr, buffer_model.get_text(),
                  range(first_line, number_of_line),
                  0, this->_nlines, this->_ncols, 0, false);
-    if (buffer_model.get_display_attributes()) {
-      print_attrs(stdscr, buffer_model.get_attrs(), buffer_model.get_text(),
-                   range(first_line,
-                         std::max(0,
-                          (int) std::min(first_line + this->_nlines,
-                                         number_of_line) - 0)),
+    // If attributes have to be displayed and we are in filtering state, display
+    // filter attributes
+    LOGDBG("_state_model.get_state(): " << _state_model.get_state());
+    if (buffer_model.get_display_attributes() 
+        && (_state_model.get_state() == state_e::FILTER_STATE 
+            || _state_model.get_state() == state_e::ADD_FILTER_STATE)) {
+      LOGDBG(" TOTO TITI TUTU ");
+      print_attrs(stdscr, buffer_model.get_filter_attributes()->get_attrs(), 
+                  buffer_model.get_text(),
+                  range(first_line,
+                        std::max(0,
+                                (int) std::min(first_line + this->_nlines,
+                                number_of_line) - 0)),
+                   0, this->_nlines, this->_ncols, 0, false);
+    }
+    // else if attributes have to be displayed and we are in search or browse
+    // state, display filter attributes
+    else if (buffer_model.get_display_attributes() 
+             && (_state_model.get_state() == state_e::SEARCH_STATE
+                 || _state_model.get_state() == state_e::BROWSE_STATE)) {
+      LOGDBG("Print SEARCH attributes");
+      print_attrs(stdscr, buffer_model.get_search_attributes()->get_attrs(), 
+                  buffer_model.get_text(),
+                  range(first_line,
+                        std::max(0,
+                                (int) std::min(first_line + this->_nlines,
+                                number_of_line) - 0)),
                    0, this->_nlines, this->_ncols, 0, false);
     }
     redraw_prompt(_prompt_model);

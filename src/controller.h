@@ -183,6 +183,10 @@ public:
   void set_search_direction(bool forward);
   /** (Re)start the search processor */
   void find_search_term();
+  /**
+    * Set the line from which the search shall begin, either forward or backward
+    */
+  void set_search_focus_line(uint line_index);
   /** Stop the search processor and clear its result */
   void stop_search();
   /**

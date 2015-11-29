@@ -6,13 +6,20 @@
 #ifndef __SEARCH_H__
 #define __SEARCH_H__
 
-#include "buffer_model.h"
+#include <list>
 
-struct found_item {
+#include "processors/processor.h"
+#include "processors/attrs.h"
+
+// Forward declaration
+class BufferModel;
+
+typedef struct found_item_t {
   uint line;
   uint start_pos;
   uint end_pos;
-};
+  found_item_t(uint l, uint s, uint e) : line(l), start_pos(s), end_pos(e) {}
+} found_item_t;
 
 // TODO: AttributeHolder should be a composition not an inheritance!
 class SearchEngine : public ProcessorThread, public AttributeHolder {
@@ -29,25 +36,17 @@ public:
    * Re-arm the filter state so that the buffer of filtered line is clear, and a
    * new filtering can begin
    */
-  void rearm(uint &current_buffer_line, uint &current_filtered_line);
+  void rearm();
   /*
    * Clear the result of the find engine
    */
   void clear_result();
-  /*
-   * Get the next item in our list of found items
-   */
-  void get_to_next_found_item();
-  /*
-   * Get the previous item in our list of found items
-   */
-  void get_to_previous_found_item();
 private:
   /*
    * Match a character string from the buffer with a particular filter set.
    */
-  bool match(const char *line, const std::string term,
-             std::cmatch &matches);
+  bool match(const char *line, const std::string &term,
+             uint &position, uint &length);
 
 private:
   //Controller  &m_controller;
@@ -56,10 +55,6 @@ private:
   uint m_low_boundary;
   // higher indexed line searched
   uint m_high_boundary;
-  // found items
-  std::list<found_item> m_found_items;
-  // Currently focused item
-  std::list<found_item>::iterator m_focused_item;
 };
 
 #endif // __SEARCH_H__

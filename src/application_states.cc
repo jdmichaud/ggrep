@@ -10,6 +10,18 @@
 #include "commands/filtering.h"
 #include "commands/searching.h"
 
+/*
+ * Macro to avoid having to redefine all the special key management for OnLiners
+ */
+#define COMMAND_LINE_EVENTS_HANDLERS() \
+  { new Arrow(KEY_LEFT),    [this](const IEvent& b) { m_invoker.create_and_execute<LeftCommand>(this); } }, \
+  { new Arrow(KEY_RIGHT),   [this](const IEvent& b) { m_invoker.create_and_execute<RightCommand>(this); } }, \
+  { new Arrow(C_KEY_LEFT),  [this](const IEvent& b) { m_invoker.create_and_execute<LeftWordCommand>(this); } }, \
+  { new Arrow(C_KEY_RIGHT), [this](const IEvent& b) { m_invoker.create_and_execute<RightWordCommand>(this); } }, \
+  { new Nav(KEY_HOME),      [this](const IEvent& b) { m_invoker.create_and_execute<BegLineCommand>(this); } }, \
+  { new Nav(KEY_END),       [this](const IEvent& b) { m_invoker.create_and_execute<EndLineCommand>(this); } } \
+
+
 DefaultState::DefaultState(Context &context, Controller &controller,
                            IState *parent_state) :
   State(context, controller, parent_state,
@@ -163,10 +175,7 @@ AddFilterState::AddFilterState(Context &context, Controller &controller,
                          IState *parent_state) :
   State(context, controller, parent_state,
     {
-      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<CancelCurrentFilterEntry>();
-                                                          m_invoker.create_and_execute<BacktrackCommand>(); } },
-      { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<EnterCurrentFilterEntry>();
-                                                          m_invoker.create_and_execute<BacktrackCommand>(); } },
+      COMMAND_LINE_EVENTS_HANDLERS(),
       { new Ctrl(KEY_BACKSPACE),[this](const IEvent& b) { m_invoker.create_and_execute<BackspaceCommand>(this);
                                                           m_invoker.create_and_execute<UpdateCurrentFilterEntry,
                                                                                        const std::string &,
@@ -175,12 +184,10 @@ AddFilterState::AddFilterState(Context &context, Controller &controller,
                                                           m_invoker.create_and_execute<UpdateCurrentFilterEntry,
                                                                                        const std::string &,
                                                                                        const IEvent &>(m_text, b); } },
-      { new Arrow(KEY_LEFT),    [this](const IEvent& b) { m_invoker.create_and_execute<LeftCommand>(this); } },
-      { new Arrow(KEY_RIGHT),   [this](const IEvent& b) { m_invoker.create_and_execute<RightCommand>(this); } },
-      { new Arrow(C_KEY_LEFT),  [this](const IEvent& b) { m_invoker.create_and_execute<LeftWordCommand>(this); } },
-      { new Arrow(C_KEY_RIGHT), [this](const IEvent& b) { m_invoker.create_and_execute<RightWordCommand>(this); } },
-      { new Nav(KEY_HOME),      [this](const IEvent& b) { m_invoker.create_and_execute<BegLineCommand>(this); } },
-      { new Nav(KEY_END),       [this](const IEvent& b) { m_invoker.create_and_execute<EndLineCommand>(this); } },
+      { new Ctrl(KEY_ESC),      [this](const IEvent& b) { m_invoker.create_and_execute<CancelCurrentFilterEntry>();
+                                                          m_invoker.create_and_execute<BacktrackCommand>(); } },
+      { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<EnterCurrentFilterEntry>();
+                                                          m_invoker.create_and_execute<BacktrackCommand>(); } },
       { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this);
                                                           m_invoker.create_and_execute<UpdateCurrentFilterEntry,
                                                                                        const std::string &,
@@ -242,10 +249,17 @@ SearchState::SearchState(Context &context, Controller &controller,
                        IState *parent_state) :
   State(context, controller, parent_state,
     {
+      COMMAND_LINE_EVENTS_HANDLERS(),
+      { new Ctrl(KEY_BACKSPACE),[this](const IEvent& b) { m_invoker.create_and_execute<BackspaceCommand>(this);
+                                                          m_invoker.create_and_execute<UpdateSearchTerm,
+                                                                                       const std::string &>(m_text); } },
+      { new Ctrl(KEY_DC),       [this](const IEvent& b) { m_invoker.create_and_execute<DeleteCommand>(this);
+                                                          m_invoker.create_and_execute<UpdateSearchTerm,
+                                                                                       const std::string &>(m_text); } },
       { new Ctrl(KEY_ESC),      [this](const IEvent& b) { (*this).clear();
                                                           m_invoker.create_and_execute<BacktrackCommand>(); } },
-      { new Printable('/'),     [this](const IEvent& b) { ; } },
-      { new Printable('?'),     [this](const IEvent& b) { ; } },
+      { new Printable('/'),     [this](const IEvent& b) { m_invoker.create_and_execute<SetSearchDirectionCommand>(true); } },
+      { new Printable('?'),     [this](const IEvent& b) { m_invoker.create_and_execute<SetSearchDirectionCommand>(false); } },
       { new Ctrl(MY_KEY_ENTER), [this](const IEvent& b) { m_invoker.create_and_execute<BacktrackCommand>(); } },
       { new Printable(KLEENE),  [this](const IEvent& b) { m_invoker.create_and_execute<EnterChar, const IEvent &>(b, this);
                                                           m_invoker.create_and_execute<UpdateSearchTerm,
@@ -261,6 +275,9 @@ void SearchState::enter(const IEvent &e) {
   else (*this).m_forward_search = false; // else must be '?'
   // Backup the current buffer position
   (*this).m_initial_first_line = m_controller.get_first_line_displayed();
+  // Set the current first displayed line as the focused line from where the
+  // search shall begin
+  m_controller.set_search_focus_line(m_controller.get_first_line_displayed());
   // Update the model
   update();
 }
