@@ -2,7 +2,7 @@
  *
  *  Created by Jean-Daniel Michaud - 05-Mar-2014
  *  Implementation of a Poducer/Consumer stack as a Monitor
- *
+ *  TODO: Use a ring buffer instead of a std::list
  */
 
 #ifndef __WORK_QUEUE_HPP__
