@@ -3,8 +3,10 @@
 # Use '-DCMAKE_BUILD_TYPE=debug' to enable -ggdb3 flag.
 
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
-set (CMAKE_TOOLCHAIN_FILE cmake/clang.cmake)
 project(ggrep)
+
+# Use clang as compiler
+set (CMAKE_TOOLCHAIN_FILE cmake/clang.cmake)
 
 find_package(Threads)
 find_package(Curses)
