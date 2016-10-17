@@ -11,13 +11,13 @@
 
 class EventFactory {
 public:
-  Event&& build_event(uint event_id) {
-    if (isprint(event_id))             return std::move(Printable(event_id));
-    else if (isarrow(event_id))        return std::move(Arrow(event_id));
-    else if (isnav(event_id))          return std::move(Nav(event_id));
-    else if (isfunctionkey(event_id))  return std::move(Function(event_id));
-    else if (isctrl(event_id))         return std::move(Ctrl(event_id));
-    else if (isredraw(event_id))       return std::move(Redraw(event_id));
+  Event build_event(uint event_id) {
+    if (isprint(event_id))             return Printable(event_id);
+    else if (isarrow(event_id))        return Arrow(event_id);
+    else if (isnav(event_id))          return Nav(event_id);
+    else if (isfunctionkey(event_id))  return Function(event_id);
+    else if (isctrl(event_id))         return Ctrl(event_id);
+    else if (isredraw(event_id))       return Redraw(event_id);
 
     LOGERR("EventFactory: unknown event_id " << event_id);
     throw std::runtime_error("unknown event id " + std::to_string(event_id));
