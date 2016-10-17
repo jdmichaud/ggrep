@@ -3,23 +3,23 @@
 # Use '-DCMAKE_BUILD_TYPE=debug' to enable -ggdb3 flag.
 
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
+set (CMAKE_TOOLCHAIN_FILE cmake/clang.cmake)
 project(ggrep)
-
-set(CMAKE_C_COMPILER /usr/bin/clang)
-set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 
 find_package(Threads)
 find_package(Curses)
-Find_package(GTest)
+#Find_package(GTest)
 find_library(LIBEFENCE_LIBRARY NAMES efence libefence)
 find_library(LIBSEGFAULT_LIBRARY NAMES SegFault libSegFault)
+
+add_definitions(-std=c++11)
 
 # Warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -Wfatal-errors -Wno-unused-parameter -Wno-potentially-evaluated-expression")
 # Standard libs to use
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 # Optimisation flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} O3 -Os")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Os")
 # Activate error level macro
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DS_LOGERR")
 # Link option
