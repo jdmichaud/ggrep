@@ -10,4 +10,5 @@ src/ggrep
 ggrep.sublime-project
 ggrep.sublime-workspace
 lib
-
+# CMake
+build
