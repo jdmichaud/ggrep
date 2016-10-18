@@ -20,8 +20,7 @@ TerminalView::TerminalView(BrowserModel &browser_model, FBarModel &fbar_model,
 }
 
 TerminalView::~TerminalView() {
-  // Restore terminal settings
-  endwin();
+  deinit();
 }
 
 uint TerminalView::init() {
@@ -53,6 +52,14 @@ uint TerminalView::init() {
   // Draw the screen at least once
   this->redraw_all();
   return 0;
+}
+
+void TerminalView::deinit() {
+  // Restore terminal settings
+  int ret = endwin();
+  if (ret != OK) {
+    LOGDBG("Curses was not properly de-initilized");
+  }
 }
 
 void TerminalView::notify_browser_changed() {

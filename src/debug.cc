@@ -8,17 +8,19 @@
 # define _XOPEN_SOURCE
 #endif
 #include <ucontext.h>
+#include <string>
 
 #include "debug.h"
 #include "logmacros.h"
+#include "exceptions.h"
 
 /*
  * Ugly function to print a backtrace in case of crash.
  * Should probably be somewhere else
+ * All this is very unsafe, but we are crashing anyway so...
  */
 void bt_sighandler(int sig, siginfo_t *info,
                    void *secret) {
-
   void *trace[16];
   char **messages = (char **)nullptr;
   int i, trace_size = 0;

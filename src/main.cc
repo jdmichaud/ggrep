@@ -5,6 +5,7 @@
 #include "terminal_view.h"
 #include "controller.h"
 #include "debug.h"
+#include "exceptions.h"
 
 #define VERSION 0.3
 
@@ -67,19 +68,47 @@ void manage_options(int argc, char **argv, char *&filename) {
     filename = argv[i];
 }
 
-void install_signal_handlers() {
+Controller *g_controller = NULL;
+
+void terminate(int sig, siginfo_t *info, void *oldact) {
+  // Mask SIGINT signal
+  sigset_t set;
+  sigaddset(&set, SIGINT);
+  if (pthread_sigmask(SIG_BLOCK, &set, NULL) != 0)
+    LOGERR("pthread_sigmask failed");
+    // We continue anyway
+  LOGINF("User abortion requested");
+  if (g_controller) {
+    g_controller->interrupt();
+    // Inject whatever just to unblock the waiting thread
+    g_controller->inject(0);
+  } else {
+    LOGERR("Controller is not instanciated, expect undefined behavior");
+  }
+}
+
+void install_sigsegv_handler() {
+  // Setup SIGINT handlers
+  struct sigaction sa_int;
+  sa_int.sa_sigaction = terminate;
+  sigemptyset (&sa_int.sa_mask);
+  sa_int.sa_flags = SA_RESTART | SA_SIGINFO;
+  sigaction(SIGINT, &sa_int, NULL);
+}
+
+void install_sigint_handler() {
+  // Setup SIGSEGV handlers
   struct sigaction sa;
   sa.sa_sigaction = bt_sighandler;
   sigemptyset (&sa.sa_mask);
   sa.sa_flags = SA_RESTART | SA_SIGINFO;
   sigaction(SIGSEGV, &sa, NULL);
-  sigaction(SIGINT, &sa, NULL);
 }
 
 int main(int argc, char **argv) {
   LOGDBG("main starts here --------------------------------------------------");
   // For the stack trace in case of a crash
-  install_signal_handlers();
+  install_sigsegv_handler();
   // Parse the options
   char *filename = nullptr;
   manage_options(argc, argv, filename);
@@ -96,6 +125,9 @@ int main(int argc, char **argv) {
   // Create the controller
   Controller controller(browser_model, fbar_model, prompt_model, state_model,
                         buffer_factory);
+  // Install interrupt routine
+  g_controller = &controller;
+  install_sigint_handler();
   // Bind the view to the controller so the controller knows where to listen for
   // inputs
   controller.bind_view(view);

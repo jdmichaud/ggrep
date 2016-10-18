@@ -33,6 +33,7 @@ public:
 
 
   uint init();
+  void deinit();
   void notify_browser_changed();
   void notify_buffer_changed();
   void notify_fbar_changed();
