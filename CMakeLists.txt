@@ -3,10 +3,10 @@
 # Use '-DCMAKE_BUILD_TYPE=debug' to enable -ggdb3 flag.
 
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
-project(ggrep)
-
 # Use clang as compiler
 set (CMAKE_TOOLCHAIN_FILE cmake/clang.cmake)
+project(ggrep)
+
 
 find_package(Threads)
 find_package(Curses)
@@ -27,7 +27,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DS_LOGERR")
 # Link option
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 # For debugging
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${LIBEFENCE_LIBRARY} ${LIBSEGFAULT_LIBRARY}")
+# -fsanitize=memory makes ggrep crash on startup
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DS_LOGINF -DS_LOGDBG")
+# ${LIBEFENCE_LIBRARY} ${LIBSEGFAULT_LIBRARY}
+# -fsanitize=memory makes ggrep crash on startup
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
 
 add_subdirectory(src)
 # add_subdirectory(test)
