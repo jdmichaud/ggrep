@@ -55,3 +55,7 @@ RUN cd /home/jedi && \
 
 # Force color prompt
 RUN sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/g' /home/jedi/.bashrc
+
+# Git configuration
+RUN git config --global user.email "jean.daniel.michaud@gmail.com" && \
+  git config --global user.name "JD"
