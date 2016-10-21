@@ -3,8 +3,6 @@
 
 FROM ubuntu:xenial
 
-# For the proxy
-
 # Create user
 RUN useradd jedi --create-home --password jedi && echo "jedi:jedi" | chpasswd && adduser jedi sudo
 
@@ -59,3 +57,6 @@ RUN sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/g' /home/jedi/.bash
 # Git configuration
 RUN git config --global user.email "jean.daniel.michaud@gmail.com" && \
   git config --global user.name "JD"
+
+# Set prompt with image name
+RUN echo 'export PS1="`echo $PS1 | sed s/@.h/@ggrep-build/g` "' >> /home/jedi/.profile
