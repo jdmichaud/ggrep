@@ -1,6 +1,6 @@
 # Usage:
 # Create a build folder, cd into it and just do: cmake ../
-# Use '-DCMAKE_BUILD_TYPE=debug' to enable -ggdb3 flag.
+# Use '-DCMAKE_BUILD_TYPE=Debug' to enable -ggdb3 flag.
 
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
 # Use clang as compiler
