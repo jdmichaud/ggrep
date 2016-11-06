@@ -1,5 +1,5 @@
 # Build with
-# docker build -t domos-env .
+# docker build -t ggrep-build .
 
 FROM ubuntu:xenial
 
@@ -27,6 +27,12 @@ RUN apt-get install -y build-essential \
   python \
   python-dev \
   python-setuptools \
+# For X11 application (i.e. Clion)
+  libxrender1 \
+  libxtst6 \
+  libxi6 \
+  libfreetype6 \
+  libfontconfig1 \
 # libraries
   libncurses5-dev \
   libc++-dev \
@@ -49,7 +55,7 @@ RUN cd /home/jedi && \
   ln -s /home/jedi/dotfiles/.vimrc.local.bundles /home/jedi/.vimrc.local.bundles && \
   ln -s /home/jedi/dotfiles/.tmux.conf /home/jedi/.tmux.conf && \
   ln -s /home/jedi/dotfiles/.git /home/jedi/.git && \
-  ln -s /home/jedi/dotfiles/sh /home/jedi/sh
+  git clone https://github.com/jdmichaud/sh
 
 # Force color prompt
 RUN sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/g' /home/jedi/.bashrc
