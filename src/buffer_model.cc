@@ -98,7 +98,7 @@ void BufferModel::add_filter(const std::string &filter) {
   std::lock_guard<std::mutex> lock(m_filter_set_mutex);
   // Add the new regex to the set of filters of the current buffer
   set_filter_set().update().filters.emplace_back(
-    std::move(std::make_pair(filter, std::regex(filter))));
+    std::make_pair(filter, std::regex(filter)));
   // Signal the filtering processor
   m_filter.signal();
 }
@@ -111,7 +111,7 @@ void BufferModel::update_last_filter(const std::string &filter) {
     update.update().filters.pop_back();
     // ... and replace it with the new value.
     update.update().filters.emplace_back(
-      std::move(std::make_pair(filter, std::regex(filter))));
+      std::make_pair(filter, std::regex(filter)));
   }
   // Signal the filtering processor
   m_filter.signal();

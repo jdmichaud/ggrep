@@ -190,8 +190,7 @@ bool Controller::create_buffer(const std::string &filepath) {
     buffer_model->register_observer(std::bind( &Controller::route_callback,
                                                this, REDRAW_BUFFER, _1 ));
     // Add the buffer model to the browser model
-    _browser_model.emplace_buffer(
-      std::move(std::unique_ptr<BufferModel>(buffer_model)));
+    _browser_model.emplace_buffer(std::unique_ptr<BufferModel>(buffer_model));
     // Generate the FILE_OPENED event into the state machine
     _context.inject(Event(FILE_OPENED));
   }
