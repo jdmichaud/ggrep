@@ -18,14 +18,11 @@ add_definitions(-std=c++11)
 
 # Warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -Wfatal-errors -Wno-unused-parameter -Wno-potentially-evaluated-expression")
-# Standard libs to use
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 # Optimisation flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Os")
 # Activate error level macro
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DS_LOGERR")
 # Link option
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 # For debugging
 # -fsanitize=memory makes ggrep crash on startup
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DS_LOGINF -DS_LOGDBG")

@@ -5,7 +5,6 @@
 #include "terminal_view.h"
 #include "controller.h"
 #include "debug.h"
-#include "exceptions.h"
 
 #define VERSION 0.3
 

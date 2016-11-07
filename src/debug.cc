@@ -12,7 +12,6 @@
 
 #include "debug.h"
 #include "logmacros.h"
-#include "exceptions.h"
 
 /*
  * Ugly function to print a backtrace in case of crash.
