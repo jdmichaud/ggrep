@@ -12,3 +12,4 @@ ggrep.sublime-workspace
 lib
 # CMake
 build
+.idea
